@@ -15,7 +15,6 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import * as compat from "thug2-level-converter-core/compat/compat.ts";
 import { FormatError } from "thug2-level-converter-core/level_port/binio.ts";
 import * as common from "thug2-level-converter-core/level_port/common.ts";
 import * as geometry from "thug2-level-converter-core/level_port/geometry.ts";
@@ -63,6 +62,7 @@ import {
     runMain,
 } from "thug2-level-converter-core/lib/py.ts";
 import { StructError, unpackNumbers } from "thug2-level-converter-core/lib/struct.ts";
+import * as compat from "thug2-thugpro-compat/profile.ts";
 import * as collfix from "./collfix.ts";
 import * as thps3 from "./thps3.ts";
 import { Thps3Peds } from "./thps3_peds.ts";
@@ -852,7 +852,7 @@ export class PortChanges {
 export const thps3PortChanges = (enabled = true): PortChanges =>
     new PortChanges(compat.portChanges("thps3_levels"), enabled);
 
-// PC-THPS3-1 (port_changes, thug2-level-converter-core/compat/thugpro/thps3_levels.json: `prefixes` per level): sector name prefixes left out.
+// PC-THPS3-1 (port_changes, thug2-thugpro-compat/thugpro/thps3_levels.json: `prefixes` per level): sector name prefixes left out.
 // Warehouse: its lights flicker in THPS3 (JKU_Ware_RoomFlicker toggles SkWare_Light_* / SkWare_Dark_*, the same
 // surfaces lit and dark); without that script both sets were drawn - z-fighting. Kept lit, as THPS3's observer mode
 // (JKU_Ware_IsObserver kills SkWare_Dark).
@@ -1789,7 +1789,7 @@ const vectorOf = (node: Struct, key: string): readonly number[] | null => {
     return v instanceof Vector && v.kind === "vector" ? v.values : null;
 };
 
-// A node's place as THUGPRO's compatibility data gives it (thug2-level-converter-core/compat/thugpro/thps3_levels.json): THUG2's world (Pos).
+// A node's place as THUGPRO's compatibility data gives it (thug2-thugpro-compat/thugpro/thps3_levels.json): THUG2's world (Pos).
 export interface CompatPlacement {
     pos: number[];
     angles: number[];
@@ -2244,7 +2244,7 @@ export function ctfNodes(
     return [out, scripts.join(""), report];
 }
 
-// The level's compatibility data from the profile (thug2-level-converter-core/compat/compat.ts; TP-10 ctf_flags, TP-11 team_nodes,
+// The level's compatibility data from the profile (thug2-thugpro-compat/profile.ts; TP-10 ctf_flags, TP-11 team_nodes,
 // TP-12 spawns).
 export function levelCompat(profile: compat.Profile, level: string): LevelCompat {
     const get = (key: string): Record<string, CompatPlacement> =>

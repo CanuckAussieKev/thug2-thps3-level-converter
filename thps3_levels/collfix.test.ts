@@ -2,7 +2,7 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type * as compat from "thug2-level-converter-core/compat/compat.ts";
+import type * as compat from "thug2-thugpro-compat/profile.ts";
 import { cover, exposure, isCollfix, replacedNodes, tri, withoutCollfix } from "./collfix.ts";
 
 const entry = (name: string, kind = "collision"): compat.Entry => ({

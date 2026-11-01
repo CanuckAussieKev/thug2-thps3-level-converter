@@ -4,9 +4,9 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as compat from "thug2-level-converter-core/compat/compat.ts";
 import * as qb from "thug2-level-converter-core/level_port/qb.ts";
 import * as scriptPort from "thug2-level-converter-core/level_port/script_port.ts";
+import * as compat from "thug2-thugpro-compat/profile.ts";
 import * as startState from "./start_state.ts";
 import {
     createdAtStart,

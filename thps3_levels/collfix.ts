@@ -1,5 +1,5 @@
 // NOT ORIGINAL - THUGPRO's invisible collision overlays in the THPS3 ports ("collfix": Suburbia's `*_collfix`,
-// Foundry's `*_coll` - TPN-THPS3-1 / -2, thug2-level-converter-core/compat/thugpro/README.md), what the converter's --no-collfix leaves out, and an offline comparison of each
+// Foundry's `*_coll` - TPN-THPS3-1 / -2, thug2-thugpro-compat/thugpro/README.md), what the converter's --no-collfix leaves out, and an offline comparison of each
 // overlay with our own converted collision at the same place.
 //
 //   node thps3_levels/collfix.ts [--game <folder>] [--json]
@@ -20,13 +20,13 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import * as compat from "thug2-level-converter-core/compat/compat.ts";
 import * as qb from "thug2-level-converter-core/level_port/qb.ts";
 import { QbFile } from "thug2-level-converter-core/level_port/qb.ts";
 import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import { parseCli } from "thug2-level-converter-core/lib/cli.ts";
 import { findInstall } from "thug2-level-converter-core/lib/install.ts";
 import { isMain, print, runMain } from "thug2-level-converter-core/lib/py.ts";
+import * as compat from "thug2-thugpro-compat/profile.ts";
 
 // --- what --no-collfix leaves out (pure, tested) --------------------------------------------------------------------
 

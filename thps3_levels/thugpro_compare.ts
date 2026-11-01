@@ -14,24 +14,11 @@
 //
 //   node thps3_levels/thugpro_compare.ts [levels...] [--thug2 C:\Games\THUG2-1] [--thugpro <dir>]
 //        [--staging <folder>] [--json out] [--details]
-//   node thps3_levels/thugpro_compare.ts --extract-thugpro thug2-level-converter-core/compat/thugpro/thps3_levels.json [--thps3 <dir>]
+//   node thps3_levels/thugpro_compare.ts --extract-thugpro thug2-thugpro-compat/thugpro/thps3_levels.json [--thps3 <dir>]
 //        (the compatibility profile's THPS3 data, TP-10 .. TP-19: see extractThugpro, nodeEdits, collisionEdits)
 
 import * as fs from "node:fs";
 import { parseArgs } from "node:util";
-import {
-    CTF_NAMES,
-    isCrown,
-    isMpRestart,
-    isName,
-    maxDiff,
-    nameOf,
-    nodeArray,
-    position,
-    sameSequence,
-    sequence,
-    TOLERANCE,
-} from "thug2-level-converter-core/compat/thugpro_nodes.ts";
 import * as colCheck from "thug2-level-converter-core/level_port/col_check.ts";
 import * as portedLevels from "thug2-level-converter-core/level_port/ported_levels.ts";
 import * as prx from "thug2-level-converter-core/level_port/prx.ts";
@@ -54,6 +41,19 @@ import {
     runMain,
     writeTextPy,
 } from "thug2-level-converter-core/lib/py.ts";
+import {
+    CTF_NAMES,
+    isCrown,
+    isMpRestart,
+    isName,
+    maxDiff,
+    nameOf,
+    nodeArray,
+    position,
+    sameSequence,
+    sequence,
+    TOLERANCE,
+} from "thug2-thugpro-compat/thugpro_nodes.ts";
 import * as startStateMod from "./start_state.ts";
 import * as thps3 from "./thps3.ts";
 import { findFolder, flagTeams, LEVELS, levelFiles, STAGING, scriptNames } from "./thps3_levels.ts";
@@ -345,7 +345,7 @@ export function compare(
 
 // --- the compatibility profile's THPS3 data (--extract-thugpro) ----------------------------------------------------
 
-// Read once from THUGPRO's install into thug2-level-converter-core/compat/thugpro/thps3_levels.json (the user approved TP-10 / TP-11,
+// Read once from THUGPRO's install into thug2-thugpro-compat/thugpro/thps3_levels.json (the user approved TP-10 / TP-11,
 // 2026-10-20), so the values are re-derived rather than typed in. For each THPS3 level THUGPRO ports under THPS3's own
 // name (levels\<level>\<level>.qb in <level>_scripts.prx):
 // - TP-10 ctf_flags: TRG_CTF_Red / _Blue and their _Base (place in THUG2's world - Pos, or Position with z negated - and
@@ -888,7 +888,7 @@ export function extractThugpro(
     thugproNew._left_out = newLeftOut;
     return {
         _comment:
-            "THUGPRO compatibility for the THPS3 level ports (thps3_levels), approved by the user 2026-10-20. Each entry is registered in README.md here (TP-10 .. TP-19). Capture the flag is decided on the server against its own flags; each side draws them from its own node array: these put our flags where THUGPRO's are, and our spawn points as THUGPRO's. TP-13 .. TP-19 (the user's decision 2026-10-20: everything THUGPRO changed, as data under the flag): its other hand edits of THPS3's nodes and collision - moved, flags, terrain, removed, renamed, rails, collision. Level keys are our (= THUGPRO's = THPS3's) level names. Read by thug2-level-converter-core/compat/compat.ts; `thps3_levels.ts convert --compat none` leaves all of it out (THPS3's own two bases). Regenerate: node thps3_levels/thugpro_compare.ts --extract-thugpro thug2-level-converter-core/compat/thugpro/thps3_levels.json",
+            "THUGPRO compatibility for the THPS3 level ports (thps3_levels), approved by the user 2026-10-20. Each entry is registered in README.md here (TP-10 .. TP-19). Capture the flag is decided on the server against its own flags; each side draws them from its own node array: these put our flags where THUGPRO's are, and our spawn points as THUGPRO's. TP-13 .. TP-19 (the user's decision 2026-10-20: everything THUGPRO changed, as data under the flag): its other hand edits of THPS3's nodes and collision - moved, flags, terrain, removed, renamed, rails, collision. Level keys are our (= THUGPRO's = THPS3's) level names. Read by thug2-thugpro-compat/profile.ts; `thps3_levels.ts convert --compat none` leaves all of it out (THPS3's own two bases). Regenerate: node thps3_levels/thugpro_compare.ts --extract-thugpro thug2-thugpro-compat/thugpro/thps3_levels.json",
         ctf_flags: flags,
         team_nodes: extra,
         spawns: spawnData,

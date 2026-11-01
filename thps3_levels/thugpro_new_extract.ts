@@ -18,7 +18,6 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { nameOf, nodeArray } from "thug2-level-converter-core/compat/thugpro_nodes.ts";
 import * as prx from "thug2-level-converter-core/level_port/prx.ts";
 import * as qb from "thug2-level-converter-core/level_port/qb.ts";
 import { Name, type QbValue, Struct } from "thug2-level-converter-core/level_port/qb.ts";
@@ -28,6 +27,7 @@ import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
 import { findPath, resolveInstall } from "thug2-level-converter-core/lib/install.ts";
 import { hex8, pyJoin } from "thug2-level-converter-core/lib/py.ts";
+import { nameOf, nodeArray } from "thug2-thugpro-compat/thugpro_nodes.ts";
 import * as thps3 from "./thps3.ts";
 import {
     ANIMAL_BIRD,

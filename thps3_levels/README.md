@@ -87,7 +87,7 @@ start of offline free skate (start_state.ts: node flags, then the start scripts 
   trigger script calling THUG2's Team_Flag), and each team gets TRG_CTF_Restart_<colour> at THPS3's restart of its
   team's type (CTF_1 / CTF_2) nearest to its base - the names THUG2's net\ctf.qb, SK4_Scripts and skater code look
   for. THPS3 has two teams: no Green / Yellow flags, no lobby team flags (TRG_Flag_*), no TRG_Team_Restart.
-  With the compatibility profile `thugpro` (the default, `--compat none` leaves it out - thug2-level-converter-core/compat/thugpro, approved
+  With the compatibility profile `thugpro` (the default, `--compat none` leaves it out - thug2-thugpro-compat/thugpro, approved
   by the user): TP-10 puts the Red / Blue flags and bases where THUGPRO has them in Rio, Sub, SI, Tok, Shp and Ware
   (the team restart then THPS3's CTF restart nearest to the flag), and TP-11 adds THUGPRO's Green / Yellow flags (their
   restarts THPS3's multiplayer restarts nearest to them), the lobby's TRG_Flag_* and TRG_Team_Restart in the 9 levels
@@ -101,7 +101,7 @@ start of offline free skate (start_state.ts: node flags, then the start scripts 
   left out), TP-19 collision edits (duplicate faces it took out, three decals without collision) - applied to THPS3's
   node array before conversion and to the collision; `thugpro_inventory.ts` lists all THUGPRO's edits and `--applied`
   checks these in our output. The data is read from
-  THUGPRO's install by `thugpro_compare.ts --extract-thugpro thug2-level-converter-core/compat/thugpro/thps3_levels.json`.
+  THUGPRO's install by `thugpro_compare.ts --extract-thugpro thug2-thugpro-compat/thugpro/thps3_levels.json`.
 - Scripts, peds, vehicles, objects (`--no-scripts` leaves them out): the level's scripts translated to THUG2's
   (thug2-level-converter-core/level_port/script_port.ts) and run from a setup script; peds as THPS3's own people (models, skeletons and
   animations: thps3_skin.ts, thps3_peds.ts; `--thug2-peds`: THUG2's people)

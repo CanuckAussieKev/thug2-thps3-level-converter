@@ -10,10 +10,19 @@ Converts the career, classic and park levels of your THPS3 install, with their s
 select. Nothing of either game is in this repository: the files are made from your copies each time. How it works,
 what is converted and what isn't: [thps3_levels/README.md](thps3_levels/README.md).
 
-- `thps3_levels/` - the converter (`thps3_levels.ts`: `convert`, `selfcheck`, `list` where it has one) and its tools.
+- `thps3_levels/` - the converter (`thps3_levels.ts`: `convert`, `selfcheck`, `list`), its readers of THPS3's RenderWare files, its people (`thps3_peds.ts`, `thps3_skin.ts`) and the THUGPRO comparisons.
 
-It depends only on [thug2-level-converter-core](https://github.com/CanuckAussieKev/thug2-level-converter-core) (pinned
-to a commit in package.json): THUG2's formats and what the converters share.
+## Dependencies
+
+Each pinned to a tagged commit in package.json (`git+https://git@github.com/...#<commit>`; one copy of each: every repository that uses one pins the same commit):
+
+- [thug2-level-converter-core](https://github.com/CanuckAussieKev/thug2-level-converter-core): THUG2's formats (scenes, collision, textures, archives, scripts), the level port's common steps and the THUGPRO compatibility register. THPS3's own formats are read here; THUG2's skeletons and animations, which its people are made into, are core's (`level_port/thug2_skeleton.ts`).
+
+## Public API
+
+None: nothing here is imported by another repository (package.json exports no module). The converter is used through its commands.
+
+Commands (package.json's `commands`: the tools with a command line - importing a module never runs one): `thps3_levels/collfix.ts`, `thps3_levels/migrate_layouts.ts`, `thps3_levels/thps3_levels.ts`, `thps3_levels/thugpro_compare.ts`, `thps3_levels/thugpro_inventory.ts`.
 
 ## Usage
 
@@ -23,7 +32,7 @@ Needs Node 24 and NeverScript's `ns.exe` (QB scripts compiled): the
 
     git clone https://github.com/CanuckAussieKev/thug2-thps3-level-converter
     cd thug2-thps3-level-converter
-    npm install
+    npm ci
     node thps3_levels/thps3_levels.ts convert Ware --thps3 "C:\Games\THPS3" --thug2 C:\Games\THUG2 --ns <ns.exe>
     node thps3_levels/thps3_levels.ts selfcheck --thug2 C:\Games\THUG2
 
@@ -35,4 +44,10 @@ select. In the decomp, where the pipeline installs this converter, the same comm
     node tools/pipeline/run.ts thps3_levels/thps3_levels.ts convert --thug2 C:\Games\THUG2
     node tools/pipeline/menu_level/make_menu_level.ts --game C:\Games\THUG2
 
-Checks: `npm run typecheck`, `npm run lint`, `npm test` (the tests that need a game install skip without it).
+Checks: `npm run typecheck`, `npm run lint`, `npm test` (the tests that need a game install skip without it;
+`package.test.ts` checks package.json's exports, commands and pins). GitHub Actions runs them on every push
+(`.github/workflows/ci.yml`).
+
+## Versions
+
+Releases are tagged `v<major>.<minor>.<patch>`; this is `v1.0.0`. The repositories that use it pin the tagged commit.

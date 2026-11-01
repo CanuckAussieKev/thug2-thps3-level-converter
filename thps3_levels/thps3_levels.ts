@@ -37,11 +37,13 @@ import {
     Vector,
 } from "thug2-level-converter-core/level_port/qb.ts";
 import * as scriptPort from "thug2-level-converter-core/level_port/script_port.ts";
+import * as staging from "thug2-level-converter-core/level_port/staging.ts";
 import type * as tex from "thug2-level-converter-core/level_port/tex.ts";
 import type * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
 import { trisToStrip } from "thug2-level-converter-core/level_port/tri_strip.ts";
 import { resolveInstall } from "thug2-level-converter-core/lib/install.ts";
+import { requireNs } from "thug2-level-converter-core/lib/neverscript.ts";
 import {
     compareStr,
     decodeLatin1,
@@ -2896,7 +2898,7 @@ function title(text: string): string {
 export function cmdConvert(args: Args): void {
     const levelsDir = pyJoin(resolveInstall(args.thps3, "thps3"), "Data", "Levels");
     const out = args.out || pyJoin(args.thug2, STAGING);
-    if (!fs.existsSync(args.ns)) pyExit(common.nsMissing(args.ns));
+    args.ns = requireNs(args.ns); // (--ns, NEVERSCRIPT, ... or `npx thug2-neverscript fetch` - lib/neverscript.ts)
     const table = new Map(LEVELS.map((row) => [row[0].toLowerCase(), row]));
     const wanted = args.levels.length ? args.levels : LEVELS.filter((row) => row[5]).map((row) => row[0]);
     const scriptsDir = pyJoin(resolveInstall(args.thps3, "thps3"), "Data", "Scripts");
@@ -2925,7 +2927,7 @@ export function cmdConvert(args: Args): void {
     const teams = flagTeams(globalQbs);
     // our own changes to THPS3's data (PC-n: kept under --compat none; --no-port-changes keeps only the required ones)
     const pc = thps3PortChanges(!args.noPortChanges);
-    if (isDir(out)) fs.rmSync(out, { recursive: true, force: true });
+    staging.prepareStaging(out, !args.levels.length);
     fs.mkdirSync(out, { recursive: true });
     const manifest: { levels: Record<string, unknown>[] } = { levels: [] };
     const report: string[] = [];
@@ -2953,7 +2955,7 @@ export function cmdConvert(args: Args): void {
         for (const kind of ["bsp", "tdx", "qb"]) {
             if (!files.has(kind)) throw new FormatError(`${folder}: no .${kind} file`);
         }
-        const levelDir = pyJoin(out, "levels", name);
+        const levelDir = staging.freshLevelFolder(out, name);
         fs.mkdirSync(levelDir, { recursive: true });
 
         // The node array first: the collision keeps the trigger faces of the kill zones it keeps, and the sectors
@@ -3166,9 +3168,8 @@ export function cmdConvert(args: Args): void {
     portedLevels.writeManifest(pyJoin(out, portedLevels.MANIFEST), manifest);
     if (hd) report.push(...hdTextures.report(hd.stats, hd.options));
     print(report.join("\n"));
-    print(
-        `wrote ${out} (${manifest.levels.length} levels); install with tools\\pipeline\\menu_level\\make_menu_level.ts`,
-    );
+    print(`wrote ${out} (${manifest.levels.length} levels)`);
+    print(staging.installHint(out));
 }
 
 // --- self-check ----------------------------------------------------------------------------------------------------
@@ -3420,7 +3421,7 @@ export function parseCommandLine(argv: readonly string[]): Args {
         thug2: values["--thug2"] ?? "C:\\Games\\THUG2\\Game",
         thps3: values["--thps3"] ?? "C:\\Games\\THPS3",
         out: values["--out"] ?? null,
-        ns: values["--ns"] ?? common.NS,
+        ns: values["--ns"] ?? "",
         noObjects: flags.has("--no-objects"),
         noScripts: flags.has("--no-scripts"),
         noMips: flags.has("--no-mips"),

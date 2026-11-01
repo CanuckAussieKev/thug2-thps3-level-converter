@@ -26,7 +26,7 @@ import * as texFile from "thug2-level-converter-core/level_port/tex.ts";
 import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
 import { findPath, resolveInstall } from "thug2-level-converter-core/lib/install.ts";
-import { hex8, pyJoin } from "thug2-level-converter-core/lib/py.ts";
+import { hex8 } from "thug2-level-converter-core/lib/py.ts";
 import { nameOf, nodeArray } from "thug2-thugpro-compat/thugpro_nodes.ts";
 import * as thps3 from "./thps3.ts";
 import {
@@ -81,11 +81,11 @@ let thug2Files: Set<string> | null = null;
 function thug2Has(thug2: string, file: string): boolean {
     if (thug2Files === null) {
         thug2Files = new Set();
-        const pre = pyJoin(thug2, "Data", "pre");
+        const pre = path.join(thug2, "Data", "pre");
         for (const a of fs.existsSync(pre) ? fs.readdirSync(pre) : []) {
             if (!a.toLowerCase().endsWith(".prx")) continue;
             try {
-                for (const [n] of prx.entries(pyJoin(pre, a), () => false)) thug2Files.add(n.toLowerCase());
+                for (const [n] of prx.entries(path.join(pre, a), () => false)) thug2Files.add(n.toLowerCase());
             } catch {
                 // (an archive we can't list: skipped)
             }
@@ -97,7 +97,7 @@ function thug2Has(thug2: string, file: string): boolean {
                 else thug2Files!.add(`${rel}${e.name}`.toLowerCase());
             }
         };
-        walk(pyJoin(thug2, "Data", "models"), "models\\");
+        walk(path.join(thug2, "Data", "models"), "models\\");
     }
     return thug2Files.has(file.toLowerCase());
 }
@@ -108,10 +108,10 @@ let thug2CallSet: Set<number> | null = null;
 export function thug2Calls(thug2: string): Set<number> {
     if (thug2CallSet === null) {
         thug2CallSet = new Set();
-        const pre = pyJoin(thug2, "Data", "pre");
+        const pre = path.join(thug2, "Data", "pre");
         for (const a of fs.existsSync(pre) ? fs.readdirSync(pre).sort() : []) {
             if (!/(^qb_scripts|_scripts)\.prx$/i.test(a)) continue;
-            for (const [, d] of prx.entries(pyJoin(pre, a), (n) => n.toLowerCase().endsWith(".qb"))) {
+            for (const [, d] of prx.entries(path.join(pre, a), (n) => n.toLowerCase().endsWith(".qb"))) {
                 try {
                     for (const c of scriptNames(d).calls) thug2CallSet.add(c);
                 } catch {
@@ -159,7 +159,7 @@ export function extractNew(input: ExtractInput): { entries: NewEntry[]; leftOut:
     const scriptsArchive = archiveName("_scripts.prx");
     const scnArchive = archiveName("scn.prx");
     const colArchive = archiveName("col.prx");
-    const folder = findFolder(pyJoin(resolveInstall(input.thps3Dir, "thps3"), "Data", "Levels"), base);
+    const folder = findFolder(path.join(resolveInstall(input.thps3Dir, "thps3"), "Data", "Levels"), base);
     if (scriptsArchive === null || folder === null) return { entries, leftOut };
     const pre = (a: string): string => findPath(thugpro, "data", "pre", a)!;
 
@@ -224,14 +224,14 @@ export function extractNew(input: ExtractInput): { entries: NewEntry[]; leftOut:
     }
     const [skyBase] = loadScriptInfo(
         new qb.QbFile(
-            fs.readFileSync(pyJoin(resolveInstall(input.thps3Dir, "thps3"), "Data", "Scripts", "levels.qb")),
+            fs.readFileSync(path.join(resolveInstall(input.thps3Dir, "thps3"), "Data", "Scripts", "levels.qb")),
             "levels.qb",
         ),
         base,
     );
     let skyVerts = -1;
     if (skyBase) {
-        const skyFolder = findFolder(pyJoin(resolveInstall(input.thps3Dir, "thps3"), "Data", "Levels"), skyBase);
+        const skyFolder = findFolder(path.join(resolveInstall(input.thps3Dir, "thps3"), "Data", "Levels"), skyBase);
         const skyBsp = skyFolder ? levelFiles(skyFolder, skyBase).get("bsp") : undefined;
         if (skyBsp !== undefined)
             skyVerts = thps3

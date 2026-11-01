@@ -18,6 +18,7 @@
 //        (the compatibility profile's THPS3 data, TP-10 .. TP-19: see extractThugpro, nodeEdits, collisionEdits)
 
 import * as fs from "node:fs";
+import * as path from "node:path";
 import { parseArgs } from "node:util";
 import * as colCheck from "thug2-level-converter-core/level_port/col_check.ts";
 import * as portedLevels from "thug2-level-converter-core/level_port/ported_levels.ts";
@@ -35,7 +36,6 @@ import {
     isMain,
     print,
     pyExit,
-    pyJoin,
     pyJsonDumps,
     pyRound,
     runMain,
@@ -63,7 +63,7 @@ import { extractNew } from "./thugpro_new_extract.ts";
 const compatChecksum = (text: string): number =>
     text.startsWith("#") ? Number.parseInt(text.slice(1), 16) >>> 0 : qb.checksum(text);
 
-const DEFAULT_THUGPRO = pyJoin(process.env.LOCALAPPDATA ?? "", "THUG Pro");
+const DEFAULT_THUGPRO = path.join(process.env.LOCALAPPDATA ?? "", "THUG Pro");
 // THPS3 levels THUGPRO leaves to THUG2's own classic remakes (compared with THUG2's files instead).
 const THUG2_OWN: ReadonlyMap<string, string> = new Map([
     ["can", "CA"],
@@ -178,7 +178,7 @@ export function compare(
         out.error = "THUGPRO has no port of it";
         return out;
     }
-    const oursQb = pyJoin(oursDir, mine, `${mine}.qb`);
+    const oursQb = path.join(oursDir, mine, `${mine}.qb`);
     if (!fs.existsSync(oursQb)) {
         out.error = `not converted (${oursQb})`;
         return out;
@@ -305,14 +305,14 @@ export function compare(
         // (the scene sectors and collision objects of both sides: a node neither draws nor collides with - trigger
         // planes collide - doesn't count)
         const sectors = new Set<number>();
-        const ourScn = pyJoin(oursDir, mine, `${mine}.scn.xbx`);
+        const ourScn = path.join(oursDir, mine, `${mine}.scn.xbx`);
         if (fs.existsSync(ourScn))
             for (const sc of thug2Scene.readScene(fs.readFileSync(ourScn), ourScn).sectors) sectors.add(sc.checksum);
         const theirScn = findPath(thugpro, "data", "pre", `${key}scn.prx`);
         if (theirScn)
             for (const [name, sdata] of prx.entries(theirScn, (n) => /\.scn\./i.test(n)))
                 for (const sc of thug2Scene.readScene(sdata, name).sectors) sectors.add(sc.checksum);
-        const ourColFile = pyJoin(oursDir, mine, `${mine}.col.xbx`);
+        const ourColFile = path.join(oursDir, mine, `${mine}.col.xbx`);
         if (fs.existsSync(ourColFile))
             for (const o of thug2Col.readCol(fs.readFileSync(ourColFile), ourColFile).objects) sectors.add(o.checksum);
         const theirColFile = findPath(thugpro, "data", "pre", `${key}col.prx`);
@@ -322,7 +322,7 @@ export function compare(
         out.start_diffs = startStateMod.startDiffs(a, b, allNames, sectors);
     }
     // collision
-    const ourCol = pyJoin(oursDir, mine, `${mine}.col.xbx`);
+    const ourCol = path.join(oursDir, mine, `${mine}.col.xbx`);
     if (fs.existsSync(ourCol)) {
         const [faces, missing] = colCheck.check(thug2Col.readCol(fs.readFileSync(ourCol), ourCol));
         out.col_ours = [faces, missing];
@@ -771,18 +771,18 @@ export function extractThugpro(
     const notes: Record<string, string[]> = {};
     const globalNames = new Map<number, string>();
     for (const q of scriptNames(thps3Dir)) for (const [k, v] of q.names) globalNames.set(k, v);
-    const scriptsDir = pyJoin(resolveInstall(thps3Dir, "thps3"), "Data", "Scripts");
+    const scriptsDir = path.join(resolveInstall(thps3Dir, "thps3"), "Data", "Scripts");
     const globalUses = nameUses(
         fs
             .readdirSync(scriptsDir)
             .filter((f) => f.toLowerCase().endsWith(".qb"))
-            .map((f) => fs.readFileSync(pyJoin(scriptsDir, f))),
+            .map((f) => fs.readFileSync(path.join(scriptsDir, f))),
     );
     for (const [base] of LEVELS) {
         const key = base.toLowerCase();
         if (THUG2_OWN.has(key) || NO_COUNTERPART.has(key)) continue;
         const scripts = findPath(thugpro, "data", "pre", `${key}_scripts.prx`);
-        const folder = findFolder(pyJoin(resolveInstall(thps3Dir, "thps3"), "Data", "Levels"), base);
+        const folder = findFolder(path.join(resolveInstall(thps3Dir, "thps3"), "Data", "Levels"), base);
         if (!scripts || !folder) continue;
         const data = prx.find(scripts, `levels\\${key}\\${key}.qb`);
         if (data === null) continue;
@@ -954,8 +954,8 @@ export function main(argv: readonly string[] = process.argv.slice(2)): number {
         print(`wrote ${v["extract-thugpro"]}`);
         return 0;
     }
-    const staging = v.staging || pyJoin(thug2, STAGING);
-    const manifest = portedLevels.readManifest(pyJoin(staging, portedLevels.MANIFEST));
+    const staging = v.staging || path.join(thug2, STAGING);
+    const manifest = portedLevels.readManifest(path.join(staging, portedLevels.MANIFEST));
     if (!manifest) pyExit(`${staging}: no ${portedLevels.MANIFEST} (convert first)`);
     let entries = manifest.levels;
     if (parsed.positionals.length) {
@@ -968,7 +968,7 @@ export function main(argv: readonly string[] = process.argv.slice(2)): number {
     let bad = 0;
     const startScripts = v["start-state"] ? thugproStartScripts(thugpro) : null;
     for (const entry of entries) {
-        const r = compare(entry, pyJoin(staging, "levels"), thugpro, thug2, startScripts);
+        const r = compare(entry, path.join(staging, "levels"), thugpro, thug2, startScripts);
         results.push(r);
         if ("error" in r) {
             print(`${r.folder.padEnd(10)} ${r.level.padEnd(16)} ${String(r.error)}`);

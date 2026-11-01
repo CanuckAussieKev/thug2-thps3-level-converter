@@ -15,7 +15,7 @@ import * as path from "node:path";
 import { parseArgs } from "node:util";
 import * as qb from "thug2-level-converter-core/level_port/qb.ts";
 import { findPath, resolveInstall } from "thug2-level-converter-core/lib/install.ts";
-import { hex8, isMain, print, pyExit, pyJoin, runMain } from "thug2-level-converter-core/lib/py.ts";
+import { hex8, isMain, print, pyExit, runMain } from "thug2-level-converter-core/lib/py.ts";
 import { LEVELS, legacyName, levelNames } from "./thps3_levels.ts";
 
 const FOLDER = "thug2-decomp-layouts";
@@ -78,8 +78,8 @@ export function main(argv: readonly string[] = process.argv.slice(2)): number {
         if (oldName === newName) continue;
         const oldScene = qb.checksum(oldName);
         const newScene = qb.checksum(newName);
-        const oldPath = pyJoin(folder, `${hex8(oldScene)}.txt`);
-        const newPath = pyJoin(folder, `${hex8(newScene)}.txt`);
+        const oldPath = path.join(folder, `${hex8(oldScene)}.txt`);
+        const newPath = path.join(folder, `${hex8(newScene)}.txt`);
         if (!fs.existsSync(oldPath)) continue;
         if (fs.existsSync(newPath)) {
             print(`${base}: ${newName} already has a layout - ${path.win32.basename(oldPath)} left as it is`);

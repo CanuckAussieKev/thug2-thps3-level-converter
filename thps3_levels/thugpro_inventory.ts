@@ -23,6 +23,7 @@
 // them or not, per level and category)
 
 import * as fs from "node:fs";
+import * as path from "node:path";
 import { parseArgs } from "node:util";
 import * as colCheck from "thug2-level-converter-core/level_port/col_check.ts";
 import * as prx from "thug2-level-converter-core/level_port/prx.ts";
@@ -31,7 +32,7 @@ import { Name, type QbValue, Struct, Vector } from "thug2-level-converter-core/l
 import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
 import { findPath, resolveInstall } from "thug2-level-converter-core/lib/install.ts";
-import { hex8, isMain, print, pyExit, pyJoin, runMain } from "thug2-level-converter-core/lib/py.ts";
+import { hex8, isMain, print, pyExit, runMain } from "thug2-level-converter-core/lib/py.ts";
 import * as compat from "thug2-thugpro-compat/profile.ts";
 import { maxDiff, nameOf, nodeArray, position } from "thug2-thugpro-compat/thugpro_nodes.ts";
 import { findFolder, LEVELS, levelFiles, STAGING, scriptNames } from "./thps3_levels.ts";
@@ -39,7 +40,7 @@ import { isSpawn, sameFace, USUAL_CLASSES } from "./thugpro_compare.ts";
 import * as thugproNew from "./thugpro_new.ts";
 
 export const SHARED = ["foun", "rio", "sub", "si", "tok", "shp", "ware", "burn", "ros"];
-const DEFAULT_THUGPRO = pyJoin(process.env.LOCALAPPDATA ?? "", "THUG Pro");
+const DEFAULT_THUGPRO = path.join(process.env.LOCALAPPDATA ?? "", "THUG Pro");
 
 // (THPS3 class -> the THUG2 classes a port makes of it, not counted as an edit: thugpro_compare's USUAL_CLASSES)
 const USUAL = USUAL_CLASSES;
@@ -109,7 +110,7 @@ export function inventory(
     limit = 8,
 ): LevelInventory | null {
     const row = LEVELS.find(([b]) => b.toLowerCase() === level);
-    const folder = row ? findFolder(pyJoin(resolveInstall(thps3Dir, "thps3"), "Data", "Levels"), row[0]) : null;
+    const folder = row ? findFolder(path.join(resolveInstall(thps3Dir, "thps3"), "Data", "Levels"), row[0]) : null;
     const scriptsPrx = findPath(thugpro, "data", "pre", `${level}_scripts.prx`);
     if (!row || !folder || !scriptsPrx) return null;
     const ownQ = new qb.QbFile(fs.readFileSync(levelFiles(folder, row[0]).get("qb")!), level);
@@ -223,7 +224,7 @@ export function inventory(
     }
     for (const k of ownScripts) if (!theirScripts.has(k)) add(inv.scripts.dropped, "THPS3 script", text(k), limit);
     // collision
-    const ourCol = pyJoin(ours, level, `${level}.col.xbx`);
+    const ourCol = path.join(ours, level, `${level}.col.xbx`);
     const theirCol = findPath(thugpro, "data", "pre", `${level}col.prx`);
     if (fs.existsSync(ourCol) && theirCol) {
         const objects = (cols: [string, Buffer][]): Map<number, thug2Col.ColObject> => {
@@ -302,7 +303,7 @@ export function appliedCheck(
     thugpro: string,
     limit = 8,
 ): Record<string, AppliedCategory> | null {
-    const qbFile = pyJoin(ours, level, `${level}.qb`);
+    const qbFile = path.join(ours, level, `${level}.qb`);
     if (!fs.existsSync(qbFile)) return null;
     const [array] = nodeArray(fs.readFileSync(qbFile), qbFile);
     const nodes = array.filter((n): n is Struct => n instanceof Struct);
@@ -362,7 +363,7 @@ export function appliedCheck(
             linked.length === r.links.length;
         check("rails (TP-18)", r.name, ok, node ? "elsewhere or other links" : "not in ours");
     }
-    const colFile = pyJoin(ours, level, `${level}.col.xbx`);
+    const colFile = path.join(ours, level, `${level}.col.xbx`);
     const colEdits = section<Record<string, { drop?: boolean; remove?: number[][][] }>>("collision") ?? {};
     if (Object.keys(colEdits).length && fs.existsSync(colFile)) {
         const objects = new Map(
@@ -401,14 +402,14 @@ export function appliedCheck(
     if (newEntries.length) {
         const loaded = thugproNew.loadNew(newEntries, thugpro);
         const ourScripts = fs.existsSync(qbFile) ? thugproNew.scriptBytes(fs.readFileSync(qbFile)) : new Map();
-        const scnFile = pyJoin(ours, level, `${level}.scn.xbx`);
+        const scnFile = path.join(ours, level, `${level}.scn.xbx`);
         const sectors = fs.existsSync(scnFile)
             ? new Set(thug2Scene.readScene(fs.readFileSync(scnFile), scnFile).sectors.map((s) => s.checksum))
             : new Set<number>();
         const colObjects = fs.existsSync(colFile)
             ? new Map(thug2Col.readCol(fs.readFileSync(colFile), colFile).objects.map((o) => [o.checksum, o]))
             : new Map<number, thug2Col.ColObject>();
-        const models = pyJoin(ours, "..", "models");
+        const models = path.join(ours, "..", "models");
         for (const e of newEntries) {
             const label = `${e.op} ${e.kind} (${e.id})`;
             const target = c(e.target.name);
@@ -439,7 +440,7 @@ export function appliedCheck(
                 check(label, e.target.name, ok, mine ? "ours differs" : "not in ours");
             } else if (e.kind === "model") {
                 const missing = Object.keys(e.files ?? {}).filter(
-                    (f) => !fs.existsSync(pyJoin(models, f.replace(/^models\\/i, ""))),
+                    (f) => !fs.existsSync(path.join(models, ...f.replace(/^models\\/i, "").split(/[\\/]/))),
                 );
                 check(label, e.target.name, !missing.length, `missing ${missing.join(", ")}`);
             }
@@ -482,7 +483,7 @@ export function main(argv: readonly string[] = process.argv.slice(2)): number {
     const globalNames = new Map<number, string>();
     for (const q of scriptNames(thps3)) for (const [k, t] of q.names) globalNames.set(k, t);
     const levels = parsed.positionals.length ? parsed.positionals.map((x) => x.toLowerCase()) : SHARED;
-    const ours = pyJoin(v.staging || pyJoin(thug2, STAGING), "levels");
+    const ours = path.join(v.staging || path.join(thug2, STAGING), "levels");
     if (v.applied) {
         // (the profile's edits in our converted levels: what of THUGPRO's changes we have now)
         const profile = compat.load("thugpro");

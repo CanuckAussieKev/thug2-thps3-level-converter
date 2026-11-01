@@ -53,7 +53,6 @@ import {
     print,
     pyExit,
     pyFloatRepr,
-    pyJoin,
     pyMax,
     pyMin,
     pyMod,
@@ -120,7 +119,7 @@ export function legacyName(base: string): string {
 // The checksums of THUG2's own level scripts and structures (its Levels.qb's scripts and globals: Load_AP,
 // Level_AP...), from the THUG2 install's Data\pre\qb_scripts.prx.
 export function thug2LevelNames(thug2: string): Set<number> {
-    const archive = pyJoin(thug2, "Data", "pre", "qb_scripts.prx");
+    const archive = path.join(thug2, "Data", "pre", "qb_scripts.prx");
     const data = fs.existsSync(archive) ? prx.find(archive, "scripts\\game\\levels.qb") : null;
     if (data === null) pyExit(`${archive}: no scripts\\game\\levels.qb (THUG2's own level names are needed)`);
     const q = new qb.QbFile(data, "Levels.qb", true);
@@ -151,7 +150,7 @@ export function levelName(base: string, entry: Struct | null, thug2Names: Readon
 // Every LEVELS row's name ({folder in lower case: name}), from THPS3's levels.qb and THUG2's Levels.qb.
 export function levelNames(thps3Dir: string, thug2: string, legacy = false): Map<string, string> {
     const levelsQ = new qb.QbFile(
-        read(pyJoin(resolveInstall(thps3Dir, "thps3"), "Data", "Scripts", "levels.qb")),
+        read(path.join(resolveInstall(thps3Dir, "thps3"), "Data", "Scripts", "levels.qb")),
         "levels.qb",
     );
     const master = masterLevels(levelsQ);
@@ -168,7 +167,7 @@ export function levelNames(thps3Dir: string, thug2: string, legacy = false): Map
 
 export function findFolder(levelsDir: string, name: string): string | null {
     for (const entry of fs.readdirSync(levelsDir)) {
-        if (entry.toLowerCase() === name.toLowerCase()) return pyJoin(levelsDir, entry);
+        if (entry.toLowerCase() === name.toLowerCase()) return path.join(levelsDir, entry);
     }
     return null;
 }
@@ -180,7 +179,7 @@ export function levelFiles(folder: string, base: string): Map<string, string> {
         if (entry.startsWith(".")) continue; // (glob's "*" skips them)
         const name = entry.toLowerCase();
         for (const kind of ["bsp", "dff", "tdx", "qb"]) {
-            if (name === `${base}.${kind}`.toLowerCase()) found.set(kind, pyJoin(folder, entry));
+            if (name === `${base}.${kind}`.toLowerCase()) found.set(kind, path.join(folder, entry));
         }
     }
     return found;
@@ -800,7 +799,7 @@ function sortedGlobQb(dir: string): string[] {
     return fs
         .readdirSync(dir, { withFileTypes: true })
         .filter((e) => !e.name.startsWith(".") && e.name.toLowerCase().endsWith(".qb"))
-        .map((e) => pyJoin(dir, e.name))
+        .map((e) => path.join(dir, e.name))
         .sort(compareStr);
 }
 
@@ -808,7 +807,7 @@ export function scriptNames(thps3Dir: string, edit: (data: Buffer) => Buffer = (
     // The game's global scripts (Data\Scripts\*.qb): the level scripts that kill the skater are among them. `edit`:
     // TP-41's editScripts.
     const out: QbFile[] = [];
-    for (const file of sortedGlobQb(pyJoin(resolveInstall(thps3Dir, "thps3"), "Data", "Scripts"))) {
+    for (const file of sortedGlobQb(path.join(resolveInstall(thps3Dir, "thps3"), "Data", "Scripts"))) {
         try {
             out.push(new qb.QbFile(edit(read(file)), file));
         } catch (e) {
@@ -1041,7 +1040,7 @@ export class Port {
         this.thug2 = thug2;
         this.sources = sources;
         this.levelsQ = levelsQ;
-        this.modelsDir = pyJoin(resolveInstall(thps3Dir, "thps3"), "Data", "Models");
+        this.modelsDir = path.join(resolveInstall(thps3Dir, "thps3"), "Data", "Models");
         this.assets = new pedsCars.Thug2Assets(thug2.root);
         this.peds = ownPeds
             ? new Thps3Peds(resolveInstall(thps3Dir, "thps3"), { thug2: thug2.root, thug2Anims: thug2.anims })
@@ -2896,14 +2895,14 @@ function title(text: string): string {
 }
 
 export function cmdConvert(args: Args): void {
-    const levelsDir = pyJoin(resolveInstall(args.thps3, "thps3"), "Data", "Levels");
-    const out = args.out || pyJoin(args.thug2, STAGING);
+    const levelsDir = path.join(resolveInstall(args.thps3, "thps3"), "Data", "Levels");
+    const out = args.out || path.join(args.thug2, STAGING);
     args.ns = requireNs(args.ns); // (--ns, NEVERSCRIPT, ... or `npx thug2-neverscript fetch` - lib/neverscript.ts)
     const table = new Map(LEVELS.map((row) => [row[0].toLowerCase(), row]));
     const wanted = args.levels.length ? args.levels : LEVELS.filter((row) => row[5]).map((row) => row[0]);
-    const scriptsDir = pyJoin(resolveInstall(args.thps3, "thps3"), "Data", "Scripts");
-    const levelsQ = new qb.QbFile(read(pyJoin(scriptsDir, "levels.qb")), "levels.qb");
-    const lightsQ = new qb.QbFile(read(pyJoin(scriptsDir, "lights.qb")), "lights.qb");
+    const scriptsDir = path.join(resolveInstall(args.thps3, "thps3"), "Data", "Scripts");
+    const levelsQ = new qb.QbFile(read(path.join(scriptsDir, "levels.qb")), "levels.qb");
+    const lightsQ = new qb.QbFile(read(path.join(scriptsDir, "lights.qb")), "lights.qb");
     // the compatibility profile (thug2-level-converter-core/compat: thugpro - TP-10 / TP-11 - or none)
     const profile = compat.load(args.compat);
     // (TP-41: THUGPRO's edits of THPS3's scripts, written into them before anything reads them)
@@ -3036,7 +3035,7 @@ export function cmdConvert(args: Args): void {
             pc,
         );
         let text = nodeText;
-        const qbPath = pyJoin(levelDir, `${name}.qb`);
+        const qbPath = path.join(levelDir, `${name}.qb`);
         const qbReport: string[] = [];
         writeLevelQb(args.ns, text, qbPath, scripts, port, tpNew, qbReport, pc.on("PC-THPS3-4"), pc.on("PC-THPS3-18"));
         const tdxFile = files.get("tdx")!;
@@ -3092,7 +3091,7 @@ export function cmdConvert(args: Args): void {
             solid: port !== null ? port.solid : new Set(),
             hd,
         });
-        const [withoutTricks, cleared] = withoutMissingTrickObjects(text, pyJoin(levelDir, `${name}.scn.xbx`));
+        const [withoutTricks, cleared] = withoutMissingTrickObjects(text, path.join(levelDir, `${name}.scn.xbx`));
         // (restarts over nothing or over a kill zone: no network spawns, no kill targets - nodes.groundRestarts)
         const [grounded, groundReport] = pc.on("PC-THPS3-7")
             ? nodes.groundRestartsAt(withoutTricks, levelDir, name)
@@ -3109,7 +3108,7 @@ export function cmdConvert(args: Args): void {
         // TPN-THPS3: THUGPRO's models (<staging>\models\..., installed into the overlay's models folder) and what of
         // THUGPRO's wasn't found or didn't match
         for (const [file, data] of tpNew.models) {
-            const target = pyJoin(out, "models", file);
+            const target = path.join(out, "models", file);
             fs.mkdirSync(path.dirname(target), { recursive: true });
             fs.writeFileSync(target, data);
         }
@@ -3137,7 +3136,7 @@ export function cmdConvert(args: Args): void {
                         thps3.readBsp(read(skyBsp), skyBsp),
                         thps3.readTdx(read(skyTdx), skyTdx),
                         sky,
-                        pyJoin(out, "levels", sky),
+                        path.join(out, "levels", sky),
                         report,
                         { withCol: false, mips: !args.noMips, tag: legacyName(skyBase), hd },
                     );
@@ -3165,7 +3164,7 @@ export function cmdConvert(args: Args): void {
     }
     // THPS3's own people the levels use: models, skeletons, animations, peds.json (thug2-level-converter-core/level_port/ped_models.ts)
     if (port?.peds) report.push(port.peds.write(out));
-    portedLevels.writeManifest(pyJoin(out, portedLevels.MANIFEST), manifest);
+    portedLevels.writeManifest(path.join(out, portedLevels.MANIFEST), manifest);
     if (hd) report.push(...hdTextures.report(hd.stats, hd.options));
     print(report.join("\n"));
     print(`wrote ${out} (${manifest.levels.length} levels)`);
@@ -3181,14 +3180,14 @@ function sortedGlobAll(dir: string): string[] {
     for (const a of fs.readdirSync(dir, { withFileTypes: true })) {
         if (a.name.startsWith(".") || !a.isDirectory()) continue;
         for (const b of fs.readdirSync(path.join(dir, a.name))) {
-            if (!b.startsWith(".")) out.push(pyJoin(dir, a.name, b));
+            if (!b.startsWith(".")) out.push(path.join(dir, a.name, b));
         }
     }
     return out.sort(compareStr);
 }
 
 export function cmdSelfcheck(args: Args): number {
-    const pre = pyJoin(args.thug2, "Data", "pre");
+    const pre = path.join(args.thug2, "Data", "pre");
     let [checked, failures] = common.thug2RoundTrips(pre, [
         "LAscn.prx",
         "LAcol.prx",
@@ -3196,10 +3195,10 @@ export function cmdSelfcheck(args: Args): number {
         "TestLevelcol.prx",
         ...args.extra,
     ]);
-    const levelsDir = pyJoin(resolveInstall(args.thps3, "thps3"), "Data", "Levels");
+    const levelsDir = path.join(resolveInstall(args.thps3, "thps3"), "Data", "Levels");
     const paths = [
         ...sortedGlobAll(levelsDir),
-        ...sortedGlobQb(pyJoin(resolveInstall(args.thps3, "thps3"), "Data", "Scripts")),
+        ...sortedGlobQb(path.join(resolveInstall(args.thps3, "thps3"), "Data", "Scripts")),
     ];
     for (const file of paths) {
         const low = file.toLowerCase();

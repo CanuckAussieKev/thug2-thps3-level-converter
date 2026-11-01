@@ -16,6 +16,7 @@
 // `kind` says what the target is; `id` the register row; `why` one line.
 
 import * as fs from "node:fs";
+import * as path from "node:path";
 import { crc32 } from "node:zlib";
 import * as geometry from "thug2-level-converter-core/level_port/geometry.ts";
 import * as prx from "thug2-level-converter-core/level_port/prx.ts";
@@ -26,11 +27,11 @@ import * as texFile from "thug2-level-converter-core/level_port/tex.ts";
 import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
 import { findPath } from "thug2-level-converter-core/lib/install.ts";
-import { hex8, pyJoin } from "thug2-level-converter-core/lib/py.ts";
+import { hex8 } from "thug2-level-converter-core/lib/py.ts";
 import type * as compat from "thug2-thugpro-compat/profile.ts";
 import { nameOf, nodeArray } from "thug2-thugpro-compat/thugpro_nodes.ts";
 
-export const DEFAULT_THUGPRO = pyJoin(process.env.LOCALAPPDATA ?? "", "THUG Pro");
+export const DEFAULT_THUGPRO = path.join(process.env.LOCALAPPDATA ?? "", "THUG Pro");
 export const REGISTER_ID = "TPN-THPS3";
 
 // The register rows (thug2-thugpro-compat/thugpro/README.md "New in THUGPRO"): one per kind of entry.
@@ -227,7 +228,7 @@ class Archives {
 export function loadNew(entries: readonly NewEntry[], thugpro: string): LevelNew {
     const out = emptyNew();
     if (!entries.length) return out;
-    if (!fs.existsSync(pyJoin(thugpro, "data", "pre")) && findPath(thugpro, "data", "pre") === null) {
+    if (!fs.existsSync(path.join(thugpro, "data", "pre")) && findPath(thugpro, "data", "pre") === null) {
         out.warnings.push(`THUGPRO not found at ${thugpro}: its ${entries.length} new items left out`);
         return out;
     }

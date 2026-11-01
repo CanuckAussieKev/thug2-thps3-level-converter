@@ -22,7 +22,7 @@
 // - Models: models\THPS3_Peds\<model>\<model>.skin.xbx (the RenderWare geometry: per material a mesh of the
 //   strip's vertices, THUG2's skinned vertex - thug2_scene.ts), .tex.xbx (the model's .tdx), an empty .col.xbx, the
 //   12-byte .cas.xbx. Profiles THPS3_<model> = {ped_body={desc_id=THPS3_<model>}}, the part no_random: added to THUG2's
-//   lists through the overlay (tools/pipeline/level_port/ped_models.ts).
+//   lists through the overlay (thug2-level-converter-core/level_port/ped_models.ts).
 // - Animations: THUG2's ped AI drives them, so each set's script loads, under the set's reference, every animation the
 //   ped AI may play (thug1_peds.pedAiAnims) from THPS3's file of the same role (ROLES; else the set's idle) - an
 //   animation the set hasn't crashes the game (0x00482BA0) - and `default`. Files: anims\THPS3\<set>\<THPS3's name>.
@@ -33,17 +33,17 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { FormatError } from "../level_port/binio.ts";
-import * as geometry from "../level_port/geometry.ts";
-import { pedAiAnims, Thug2Globals } from "../level_port/ped_ai.ts";
-import * as pedModels from "../level_port/ped_models.ts";
-import * as pedRigs from "../level_port/ped_rigs.ts";
-import * as qb from "../level_port/qb.ts";
-import { checksum } from "../level_port/qb.ts";
-import * as tex from "../level_port/tex.ts";
-import * as thug2Col from "../level_port/thug2_col.ts";
-import * as thug2Scene from "../level_port/thug2_scene.ts";
-import { decodeLatin1, hex8 } from "../lib/py.ts";
+import { FormatError } from "thug2-level-converter-core/level_port/binio.ts";
+import * as geometry from "thug2-level-converter-core/level_port/geometry.ts";
+import { pedAiAnims, Thug2Globals } from "thug2-level-converter-core/level_port/ped_ai.ts";
+import * as pedModels from "thug2-level-converter-core/level_port/ped_models.ts";
+import * as pedRigs from "thug2-level-converter-core/level_port/ped_rigs.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import { checksum } from "thug2-level-converter-core/level_port/qb.ts";
+import * as tex from "thug2-level-converter-core/level_port/tex.ts";
+import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
+import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
+import { decodeLatin1, hex8 } from "thug2-level-converter-core/lib/py.ts";
 import * as thps3 from "./thps3.ts";
 import * as levels from "./thps3_levels.ts";
 import * as skin from "./thps3_skin.ts";

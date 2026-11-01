@@ -1,8 +1,8 @@
-// NOT ORIGINAL - tests of tools/pipeline/thps3_levels/collfix.ts (no game data).
+// NOT ORIGINAL - tests of thps3_levels/collfix.ts (no game data).
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type * as compat from "../compat/compat.ts";
+import type * as compat from "thug2-level-converter-core/compat/compat.ts";
 import { cover, exposure, isCollfix, replacedNodes, tri, withoutCollfix } from "./collfix.ts";
 
 const entry = (name: string, kind = "collision"): compat.Entry => ({

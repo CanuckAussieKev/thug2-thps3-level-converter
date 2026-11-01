@@ -2,10 +2,10 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as qb from "../level_port/qb.ts";
-import { Name, type QbValue, Struct, Vector } from "../level_port/qb.ts";
-import * as thug2Scene from "../level_port/thug2_scene.ts";
-import { zfightGates } from "../level_port/zfight_gate.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import { Name, type QbValue, Struct, Vector } from "thug2-level-converter-core/level_port/qb.ts";
+import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
+import { zfightGates } from "thug2-level-converter-core/level_port/zfight_gate.ts";
 import { renameScene } from "./migrate_layouts.ts";
 import type * as thps3 from "./thps3.ts";
 import {
@@ -493,7 +493,7 @@ test("an environment-mapped pass (uv flag 0x80) as THUG2's env pass, not a uv sc
     assert.deepEqual(scroll.uvWibble, [0, -0.5, 0, 0, 0, 0, 0, 0]);
 });
 
-// z-fighting gates (tools/pipeline/level_port/zfight_gate.ts): each level as the converter wrote and resolved it, at most
+// z-fighting gates (thug2-level-converter-core/level_port/zfight_gate.ts): each level as the converter wrote and resolved it, at most
 // what it was when the gate was set (2026-10-25, C:\Games\THUG2-4) - skipped
 // where there is no such conversion (THUG2_ZFIGHT_GAME: the game folder, default the main install).
 zfightGates("thps3", {

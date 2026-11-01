@@ -1,6 +1,6 @@
 // NOT ORIGINAL - compares our converted THPS3 levels with THUGPRO's own ports of them, read from the user's THUGPRO
 // install (read only: <thugpro>\data\pre\<level>_scripts.prx and <level>col.prx), for online play between the two
-//. The THAW twin is tools/pipeline/thaw_levels/thugpro_compare.ts; its pieces are reused here.
+//. The THAW twin is thug2-thaw-level-converter/thaw_levels/thugpro_compare.ts; its pieces are reused here.
 //
 // What has to agree for a THUGPRO player and one of ours to share a level (see that tool's header): the load script's
 // name (0x46 / 0x33 carry its checksum only), the world frame (0x23 skater updates carry world positions), the King of
@@ -12,9 +12,9 @@
 // THUGPRO doesn't port THPS3's Canada, Airport and Los Angeles: it plays THUG2's own classic versions (CA, AP, LA -
 // THUG2's Levels.qb has game=THPS3 on them). Those three are compared with THUG2's own (its Data\pre) for information.
 //
-//   node tools/pipeline/thps3_levels/thugpro_compare.ts [levels...] [--thug2 C:\Games\THUG2-1] [--thugpro <dir>]
+//   node thps3_levels/thugpro_compare.ts [levels...] [--thug2 C:\Games\THUG2-1] [--thugpro <dir>]
 //        [--staging <folder>] [--json out] [--details]
-//   node tools/pipeline/thps3_levels/thugpro_compare.ts --extract-thugpro tools/pipeline/compat/thugpro/thps3_levels.json [--thps3 <dir>]
+//   node thps3_levels/thugpro_compare.ts --extract-thugpro thug2-level-converter-core/compat/thugpro/thps3_levels.json [--thps3 <dir>]
 //        (the compatibility profile's THPS3 data, TP-10 .. TP-19: see extractThugpro, nodeEdits, collisionEdits)
 
 import * as fs from "node:fs";
@@ -31,16 +31,16 @@ import {
     sameSequence,
     sequence,
     TOLERANCE,
-} from "../compat/thugpro_nodes.ts";
-import * as colCheck from "../level_port/col_check.ts";
-import * as portedLevels from "../level_port/ported_levels.ts";
-import * as prx from "../level_port/prx.ts";
-import * as qb from "../level_port/qb.ts";
-import { Name, type QbValue, Struct, Vector } from "../level_port/qb.ts";
-import * as scriptPort from "../level_port/script_port.ts";
-import * as thug2Col from "../level_port/thug2_col.ts";
-import * as thug2Scene from "../level_port/thug2_scene.ts";
-import { findPath, resolveInstall } from "../lib/install.ts";
+} from "thug2-level-converter-core/compat/thugpro_nodes.ts";
+import * as colCheck from "thug2-level-converter-core/level_port/col_check.ts";
+import * as portedLevels from "thug2-level-converter-core/level_port/ported_levels.ts";
+import * as prx from "thug2-level-converter-core/level_port/prx.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import { Name, type QbValue, Struct, Vector } from "thug2-level-converter-core/level_port/qb.ts";
+import * as scriptPort from "thug2-level-converter-core/level_port/script_port.ts";
+import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
+import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
+import { findPath, resolveInstall } from "thug2-level-converter-core/lib/install.ts";
 import {
     Float,
     formatFixed,
@@ -53,7 +53,7 @@ import {
     pyRound,
     runMain,
     writeTextPy,
-} from "../lib/py.ts";
+} from "thug2-level-converter-core/lib/py.ts";
 import * as startStateMod from "./start_state.ts";
 import * as thps3 from "./thps3.ts";
 import { findFolder, flagTeams, LEVELS, levelFiles, STAGING, scriptNames } from "./thps3_levels.ts";
@@ -345,7 +345,7 @@ export function compare(
 
 // --- the compatibility profile's THPS3 data (--extract-thugpro) ----------------------------------------------------
 
-// Read once from THUGPRO's install into tools/pipeline/compat/thugpro/thps3_levels.json (the user approved TP-10 / TP-11,
+// Read once from THUGPRO's install into thug2-level-converter-core/compat/thugpro/thps3_levels.json (the user approved TP-10 / TP-11,
 // 2026-10-20), so the values are re-derived rather than typed in. For each THPS3 level THUGPRO ports under THPS3's own
 // name (levels\<level>\<level>.qb in <level>_scripts.prx):
 // - TP-10 ctf_flags: TRG_CTF_Red / _Blue and their _Base (place in THUG2's world - Pos, or Position with z negated - and
@@ -707,7 +707,7 @@ export function extractThugpro(
     const thugproNew: Record<string, unknown> = {
         _register: `${REGISTER_ID}-1 ... ${REGISTER_ID}-6 (README.md here: "New in THUGPRO (not in any source game)")`,
         _source:
-            "References only (the user's decision 2026-10-20, with Morten1337's permission): what is new in THUGPRO's THPS3 ports, in no source game - archive and file in THUGPRO's data\\pre, the item's name and a CRC-32 of it. tools/pipeline/thps3_levels/thugpro_new.ts reads the bytes from the user's THUGPRO install (--thugpro) at convert time; a missing or different item is warned about and skipped. Each entry (compat.ts Entry): id, op (add / set / remove), kind (sector, collision, node, script, model), target {level, name}, why. Found by tools/pipeline/thps3_levels/thugpro_new_extract.ts (--extract-thugpro); never typed in. _left_out: what was found and not taken, with the reason.",
+            "References only (the user's decision 2026-10-20, with Morten1337's permission): what is new in THUGPRO's THPS3 ports, in no source game - archive and file in THUGPRO's data\\pre, the item's name and a CRC-32 of it. thps3_levels/thugpro_new.ts reads the bytes from the user's THUGPRO install (--thugpro) at convert time; a missing or different item is warned about and skipped. Each entry (compat.ts Entry): id, op (add / set / remove), kind (sector, collision, node, script, model), target {level, name}, why. Found by thps3_levels/thugpro_new_extract.ts (--extract-thugpro); never typed in. _left_out: what was found and not taken, with the reason.",
     };
     const newLeftOut: Record<string, unknown> = {};
     const newEntries: unknown[] = [];
@@ -715,20 +715,20 @@ export function extractThugpro(
     const flags: Record<string, unknown> = {
         _register: "TP-10",
         _source:
-            "THUGPRO's installed data\\pre\\<level>_scripts.prx, levels\\<level>\\<level>.qb: TRG_CTF_Red / _Blue (+ _Base) - pos in THUG2's world (Pos; Position with z negated), angles as they are. Extracted by tools/pipeline/thps3_levels/thugpro_compare.ts --extract-thugpro.",
+            "THUGPRO's installed data\\pre\\<level>_scripts.prx, levels\\<level>\\<level>.qb: TRG_CTF_Red / _Blue (+ _Base) - pos in THUG2's world (Pos; Position with z negated), angles as they are. Extracted by thps3_levels/thugpro_compare.ts --extract-thugpro.",
     };
     const extra: Record<string, unknown> = {
         _register: "TP-11",
         _source:
-            "THUGPRO's installed data\\pre\\<level>_scripts.prx, levels\\<level>\\<level>.qb: TRG_CTF_Green / _Yellow (+ _Base), TRG_Flag_<colour> (+ _Base), TRG_Team_Restart. Extracted by tools/pipeline/thps3_levels/thugpro_compare.ts --extract-thugpro.",
+            "THUGPRO's installed data\\pre\\<level>_scripts.prx, levels\\<level>\\<level>.qb: TRG_CTF_Green / _Yellow (+ _Base), TRG_Flag_<colour> (+ _Base), TRG_Team_Restart. Extracted by thps3_levels/thugpro_compare.ts --extract-thugpro.",
     };
     const spawnData: Record<string, unknown> = {
         _register: "TP-12",
         _source:
-            "THUGPRO's installed data\\pre\\<level>_scripts.prx, levels\\<level>\\<level>.qb against THPS3's Data\\Levels\\<Lvl>\\<lvl>.qb: every restart with a network type (MultiPlayer, Horse, Team, CTF*) THUGPRO moved, retyped, renamed or added (changed: pos in THUG2's world, angles, type, restart_types, restart_name, created), and THPS3's network restarts THUGPRO hasn't (removed). Extracted by tools/pipeline/thps3_levels/thugpro_compare.ts --extract-thugpro.",
+            "THUGPRO's installed data\\pre\\<level>_scripts.prx, levels\\<level>\\<level>.qb against THPS3's Data\\Levels\\<Lvl>\\<lvl>.qb: every restart with a network type (MultiPlayer, Horse, Team, CTF*) THUGPRO moved, retyped, renamed or added (changed: pos in THUG2's world, angles, type, restart_types, restart_name, created), and THPS3's network restarts THUGPRO hasn't (removed). Extracted by thps3_levels/thugpro_compare.ts --extract-thugpro.",
     };
     const source = (what: string): string =>
-        `THUGPRO's installed data\\pre\\<level>_scripts.prx (levels\\<level>\\<level>.qb) against THPS3's Data\\Levels\\<Lvl>\\<lvl>.qb: ${what}. Extracted by tools/pipeline/thps3_levels/thugpro_compare.ts --extract-thugpro (nodeEdits).`;
+        `THUGPRO's installed data\\pre\\<level>_scripts.prx (levels\\<level>\\<level>.qb) against THPS3's Data\\Levels\\<Lvl>\\<lvl>.qb: ${what}. Extracted by thps3_levels/thugpro_compare.ts --extract-thugpro (nodeEdits).`;
     const moved13: Record<string, unknown> = {
         _register: "TP-13",
         _source: source(
@@ -766,7 +766,7 @@ export function extractThugpro(
     const collision19: Record<string, unknown> = {
         _register: "TP-19",
         _source:
-            "THUGPRO's installed data\\pre\\<level>col.prx / <level>scn.prx against THPS3's Data\\Levels\\<Lvl>\\<lvl>.bsp: an object THUGPRO draws without collision (drop), the faces THUGPRO's object lacks (remove: THPS3's own corners, in THPS3's order). Extracted by tools/pipeline/thps3_levels/thugpro_compare.ts --extract-thugpro (collisionEdits).",
+            "THUGPRO's installed data\\pre\\<level>col.prx / <level>scn.prx against THPS3's Data\\Levels\\<Lvl>\\<lvl>.bsp: an object THUGPRO draws without collision (drop), the faces THUGPRO's object lacks (remove: THPS3's own corners, in THPS3's order). Extracted by thps3_levels/thugpro_compare.ts --extract-thugpro (collisionEdits).",
     };
     const notes: Record<string, string[]> = {};
     const globalNames = new Map<number, string>();
@@ -888,7 +888,7 @@ export function extractThugpro(
     thugproNew._left_out = newLeftOut;
     return {
         _comment:
-            "THUGPRO compatibility for the THPS3 level ports (tools/pipeline/thps3_levels), approved by the user 2026-10-20. Each entry is registered in README.md here (TP-10 .. TP-19). Capture the flag is decided on the server against its own flags; each side draws them from its own node array: these put our flags where THUGPRO's are, and our spawn points as THUGPRO's. TP-13 .. TP-19 (the user's decision 2026-10-20: everything THUGPRO changed, as data under the flag): its other hand edits of THPS3's nodes and collision - moved, flags, terrain, removed, renamed, rails, collision. Level keys are our (= THUGPRO's = THPS3's) level names. Read by tools/pipeline/compat/compat.ts; `thps3_levels.ts convert --compat none` leaves all of it out (THPS3's own two bases). Regenerate: node tools/pipeline/thps3_levels/thugpro_compare.ts --extract-thugpro tools/pipeline/compat/thugpro/thps3_levels.json",
+            "THUGPRO compatibility for the THPS3 level ports (thps3_levels), approved by the user 2026-10-20. Each entry is registered in README.md here (TP-10 .. TP-19). Capture the flag is decided on the server against its own flags; each side draws them from its own node array: these put our flags where THUGPRO's are, and our spawn points as THUGPRO's. TP-13 .. TP-19 (the user's decision 2026-10-20: everything THUGPRO changed, as data under the flag): its other hand edits of THPS3's nodes and collision - moved, flags, terrain, removed, renamed, rails, collision. Level keys are our (= THUGPRO's = THPS3's) level names. Read by thug2-level-converter-core/compat/compat.ts; `thps3_levels.ts convert --compat none` leaves all of it out (THPS3's own two bases). Regenerate: node thps3_levels/thugpro_compare.ts --extract-thugpro thug2-level-converter-core/compat/thugpro/thps3_levels.json",
         ctf_flags: flags,
         team_nodes: extra,
         spawns: spawnData,

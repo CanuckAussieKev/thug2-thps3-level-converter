@@ -10,10 +10,10 @@
 // Used by thugpro_compare.ts (--start-state) to compare our THPS3 ports' free-skate world with THUGPRO's
 //.
 
-import * as qb from "../level_port/qb.ts";
-import { Name, type QbValue, Struct } from "../level_port/qb.ts";
-import { decodeLatin1 } from "../lib/py.ts";
-import { unpackNumbers } from "../lib/struct.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import { Name, type QbValue, Struct } from "thug2-level-converter-core/level_port/qb.ts";
+import { decodeLatin1 } from "thug2-level-converter-core/lib/py.ts";
+import { unpackNumbers } from "thug2-level-converter-core/lib/struct.ts";
 
 export type Shown = "on" | "off" | "hidden";
 

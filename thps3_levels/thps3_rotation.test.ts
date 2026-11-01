@@ -2,9 +2,9 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { checksum } from "../level_port/qb.ts";
-import { Tok } from "../level_port/script_port.ts";
-import { pack } from "../lib/struct.ts";
+import { checksum } from "thug2-level-converter-core/level_port/qb.ts";
+import { Tok } from "thug2-level-converter-core/level_port/script_port.ts";
+import { pack } from "thug2-level-converter-core/lib/struct.ts";
 import { ROTATION_REWRITES, thps3Rotation } from "./thps3_rotation.ts";
 
 const name = (text: string): Tok => new Tok(0x16, pack("<I", checksum(text)), 0);

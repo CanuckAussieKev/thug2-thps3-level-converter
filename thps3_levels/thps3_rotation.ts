@@ -24,9 +24,9 @@
 //   stops: speed^2 / 2d) in the same time at a constant speed, its average.
 // Statements without deceleration, or with a value that isn't a plain number, are kept as they are.
 
-import { checksum } from "../level_port/qb.ts";
-import { Tok } from "../level_port/script_port.ts";
-import { pack } from "../lib/struct.ts";
+import { checksum } from "thug2-level-converter-core/level_port/qb.ts";
+import { Tok } from "thug2-level-converter-core/level_port/script_port.ts";
+import { pack } from "thug2-level-converter-core/lib/struct.ts";
 
 export const ROTATIONS = ["Obj_RotX", "Obj_RotY", "Obj_RotZ"] as const;
 const ROT_X = checksum("Obj_RotX");

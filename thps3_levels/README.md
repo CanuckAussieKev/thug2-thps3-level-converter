@@ -2,15 +2,15 @@
 
 Converts the levels of your own THPS3 (PC) install to THUG2's formats and puts them in THUG2's level select (its
 THPS3 section: Up / Down in the level select switches games; signs and globe stars from
-tools/pipeline/menu_level/level_select.ts's `THPS3_LEVELS`). Nothing of either game is in the repo: the files are made from
+thug2-content-pipeline/menu_level/level_select.ts's `THPS3_LEVELS`). Nothing of either game is in the repo: the files are made from
 your copies each time.
 
 ## Running it
 
 Needs Node 24+ (`npm install` once), NeverScript (`tools\build_neverscript.ps1` ->
-`out\neverscript\ns.exe`) and, to install the levels, tools/pipeline/menu_level/make_menu_level.ts.
+`out\neverscript\ns.exe`) and, to install the levels, thug2-content-pipeline/menu_level/make_menu_level.ts.
 
-    node tools/pipeline/thps3_levels/thps3_levels.ts convert [--thps3 C:\Games\THPS3] [--thug2 C:\Games\THUG2]
+    node thps3_levels/thps3_levels.ts convert [--thps3 C:\Games\THPS3] [--thug2 C:\Games\THUG2]
     node tools/pipeline/menu_level/make_menu_level.ts
 
 `convert` reads `<thps3>\Data\Levels\<Lvl>\` (`<lvl>.bsp`, `.tdx`, `.qb`) and `<thps3>\Data\Scripts\` (levels.qb,
@@ -28,7 +28,7 @@ the converted levels of every staging folder (thug2-decomp-thps4, -thug1, -thps3
 `Levels.qb` and the level select. Run it again after every `convert`. Delete `thug2-decomp-thps3` and run it again to
 take the levels out.
 
-    node tools/pipeline/thps3_levels/thps3_levels.ts selfcheck
+    node thps3_levels/thps3_levels.ts selfcheck
 
 reads THUG2's LA and TestLevel scene / collision / textures (and any `--extra Data\pre` archives) and writes them
 back - they must come out byte-identical - and parses every THPS3 level file (worlds, clumps, texture dictionaries,
@@ -54,7 +54,7 @@ RenderWare 3.1 binary streams (chunks: u32 type, u32 size, u32 version 0x310) wi
   (THUG2's 32-bit textures exactly; mip levels are made by the converter).
 - `.dff` - clumps (the GameObjects: fans, doors, rubble, pumpkins...): only the ones there at the start are converted
   (static scene sectors, no collision; `--no-objects` leaves them out) - almost all are made by goal scripts. Each clump's declared size leaves out 12 bytes of its Neversoft extension.
-- `.qb` - THPS4's token format (tools/pipeline/level_port/qb.ts; Cruise Ship's node array has a `<...>`). Nodes use
+- `.qb` - THPS4's token format (thug2-level-converter-core/level_port/qb.ts; Cruise Ship's node array has a `<...>`). Nodes use
   `Position`, z negated from the geometry's - as THPS4's, which THUG2 reads the same way: the geometry is kept as is.
 
 ## Names
@@ -65,8 +65,8 @@ levels use too, so the same level loads for both. Kept as `thps3_<lvl>`: the lev
 games (no `regular_level` in its master_level_list: Tut, SkateShop; the park editor's sets) and names THUG2 already
 has (its own Load_AP / Load_LA: THUG2's classic Airport and Los Angeles, which THUGPRO plays instead of THPS3's). The
 made objects' and materials' checksums keep the old prefix: the scenes, textures and collision are byte for byte as
-before. Saved level-editor layouts under the old names: `node tools/pipeline/thps3_levels/migrate_layouts.ts --game <folder>`.
-Comparison with THUGPRO's own ports (read only): `node tools/pipeline/thps3_levels/thugpro_compare.ts --thug2 <folder>
+before. Saved level-editor layouts under the old names: `node thps3_levels/migrate_layouts.ts --game <folder>`.
+Comparison with THUGPRO's own ports (read only): `node thps3_levels/thugpro_compare.ts --thug2 <folder>
 [--details] [--start-state]`; `--start-state` lists, node by node, what each side has at the
 start of offline free skate (start_state.ts: node flags, then the start scripts followed).
 
@@ -78,16 +78,16 @@ start of offline free skate (start_state.ts: node flags, then the start scripts 
 - Textures: 32-bit as they are, with mip levels (each 2 x 2 averaged) down to the one whose shorter side is 4, as
   THUG2's own (before 2026-10-21: at most 4 levels, down to 8 x 8 - distant tiled floors and ramps shimmered).
 - Materials: no z bias in THPS3; the layers lying on other surfaces (decals, dirt and light layers, vents on ramps) get
-  one from the geometry (tools/pipeline/level_port/overlay_bias.ts), or they fight the surface under them for the depth buffer.
+  one from the geometry (thug2-level-converter-core/level_port/overlay_bias.ts), or they fight the surface under them for the depth buffer.
 - Collision: a THUG2 object per atomic sector, every face with its flags and its material's terrain; THUG2's BSP
-  trees, fixed-point vertices and reaches made (tools/pipeline/level_port/geometry.convertCol).
+  trees, fixed-point vertices and reaches made (thug2-level-converter-core/level_port/geometry.convertCol).
 - Nodes: EnvironmentObjects become LevelGeometry (their Links, to restarts for THPS3's scripts, dropped); restarts, rails, KOTH crowns kept.
 - Capture the flag: THPS3's two flag bases (GenericNode Type CTF_1 / CTF_2 - gamemode.qb: CTF_1 is the blue flag,
   CTF_2 the red) become THUG2's TRG_CTF_Blue / TRG_CTF_Red flags and their _Base objects (THUG2's own flag models, a
   trigger script calling THUG2's Team_Flag), and each team gets TRG_CTF_Restart_<colour> at THPS3's restart of its
   team's type (CTF_1 / CTF_2) nearest to its base - the names THUG2's net\ctf.qb, SK4_Scripts and skater code look
   for. THPS3 has two teams: no Green / Yellow flags, no lobby team flags (TRG_Flag_*), no TRG_Team_Restart.
-  With the compatibility profile `thugpro` (the default, `--compat none` leaves it out - tools/pipeline/compat/thugpro, approved
+  With the compatibility profile `thugpro` (the default, `--compat none` leaves it out - thug2-level-converter-core/compat/thugpro, approved
   by the user): TP-10 puts the Red / Blue flags and bases where THUGPRO has them in Rio, Sub, SI, Tok, Shp and Ware
   (the team restart then THPS3's CTF restart nearest to the flag), and TP-11 adds THUGPRO's Green / Yellow flags (their
   restarts THPS3's multiplayer restarts nearest to them), the lobby's TRG_Flag_* and TRG_Team_Restart in the 9 levels
@@ -101,9 +101,9 @@ start of offline free skate (start_state.ts: node flags, then the start scripts 
   left out), TP-19 collision edits (duplicate faces it took out, three decals without collision) - applied to THPS3's
   node array before conversion and to the collision; `thugpro_inventory.ts` lists all THUGPRO's edits and `--applied`
   checks these in our output. The data is read from
-  THUGPRO's install by `thugpro_compare.ts --extract-thugpro tools/pipeline/compat/thugpro/thps3_levels.json`.
+  THUGPRO's install by `thugpro_compare.ts --extract-thugpro thug2-level-converter-core/compat/thugpro/thps3_levels.json`.
 - Scripts, peds, vehicles, objects (`--no-scripts` leaves them out): the level's scripts translated to THUG2's
-  (tools/pipeline/level_port/script_port.ts) and run from a setup script; peds as THPS3's own people (models, skeletons and
+  (thug2-level-converter-core/level_port/script_port.ts) and run from a setup script; peds as THPS3's own people (models, skeletons and
   animations: thps3_skin.ts, thps3_peds.ts; `--thug2-peds`: THUG2's people)
   driven by THUG2's ped AI, pros and crowds as THUG2's people, resting birds and
   sharks as THUG2's animals, traffic as THUG2's cars (Car_Generic01), other vehicles and moving game objects as
@@ -111,7 +111,7 @@ start of offline free skate (start_state.ts: node flags, then the start scripts 
   left out per level. Obj_RotX / Y / Z with `deceleration` (a drag in THPS3, "slow
   down to `speed`" in THUG2 - as is, the turn runs away) are rewritten to what THPS3 does: thps3_rotation.ts. Kill zones: trigger scripts that call SK3_KillSkater(_Water) or a
   level script that does (CJR_Foun_Kill_Skater_Molten...) become THUG2's SK3_KillSkater(_Water) with the call's
-  messages and colour and a restart (tools/pipeline/level_port/nodes.ts).
+  messages and colour and a restart (thug2-level-converter-core/level_port/nodes.ts).
 - Objects not there at the start: an EnvironmentObject without CreatedAtStart is kept only when the level's start
   scripts create it (Create name= / prefix=, followed from Load_<lvl>, its once_on_startup, the Player1 restart's
   trigger script and the goal parameters' Goal_Start_Script - Airport's areas are made that way); the others (a
@@ -120,8 +120,8 @@ start of offline free skate (start_state.ts: node flags, then the start scripts 
 - Level structure: THPS3's name, sky (Load_<lvl>'s loadlevelgeometry Sky=) and lighting (its SetUp...Lights: ambient,
   lights 0 and 1, modulation factors); no music, no goals.
 
-The THUG2 writers, the geometry conversion, the node arrays and the installing are shared with tools/pipeline/thps4_levels and
-tools/pipeline/thug1_levels (tools/pipeline/level_port).
+The THUG2 writers, the geometry conversion, the node arrays and the installing are shared with thug2-thps4-level-converter/thps4_levels and
+thug2-thug1-level-converter/thug1_levels (thug2-level-converter-core/level_port).
 
 Format reference: thps-formats (Morten1337, MIT - see the decomp's THIRD_PARTY_NOTICES.md) has the start of a RenderWare reader
 for THPS3 (`thps_formats/experimental/chunky.py`); the layouts here were worked out from the files themselves.

@@ -1,6 +1,6 @@
 // NOT ORIGINAL - an inventory of THUGPRO's hand edits in its THPS3 level ports, against THPS3's own data (read only:
 // the user's THPS3 install and THUGPRO's data\pre). For the user to decide what else to agree on; nothing here changes our converter. The edits the compatibility
-// profile applies (TP-13 .. TP-19: tools/pipeline/compat/thugpro/thps3_levels.json, made by thugpro_compare.ts
+// profile applies (TP-13 .. TP-19: thug2-level-converter-core/compat/thugpro/thps3_levels.json, made by thugpro_compare.ts
 // --extract-thugpro) are checked in our converted levels with --applied.
 //
 // Per level (the 9 THUGPRO shares: foun rio sub si tok shp ware burn ros), node arrays by node name:
@@ -17,23 +17,23 @@
 // doesn't), geometry and collision (a wall or floor on one side only), spawns (TP-12). Peds, particles, sounds,
 // scripted decoration: visual or local only.
 //
-//   node tools/pipeline/thps3_levels/thugpro_inventory.ts [--thug2 C:\Games\THUG2-1] [--thps3 <dir>] [--thugpro <dir>]
+//   node thps3_levels/thugpro_inventory.ts [--thug2 C:\Games\THUG2-1] [--thps3 <dir>] [--thugpro <dir>]
 //        [--json out] [--examples N] [--staging <folder>] [--applied] [levels...]
 // (--staging: our converted levels, default <thug2>\thug2-decomp-thps3; --applied: each TP-13 .. TP-19 edit found in
 // them or not, per level and category)
 
 import * as fs from "node:fs";
 import { parseArgs } from "node:util";
-import * as compat from "../compat/compat.ts";
-import { maxDiff, nameOf, nodeArray, position } from "../compat/thugpro_nodes.ts";
-import * as colCheck from "../level_port/col_check.ts";
-import * as prx from "../level_port/prx.ts";
-import * as qb from "../level_port/qb.ts";
-import { Name, type QbValue, Struct, Vector } from "../level_port/qb.ts";
-import * as thug2Col from "../level_port/thug2_col.ts";
-import * as thug2Scene from "../level_port/thug2_scene.ts";
-import { findPath, resolveInstall } from "../lib/install.ts";
-import { hex8, isMain, print, pyExit, pyJoin, runMain } from "../lib/py.ts";
+import * as compat from "thug2-level-converter-core/compat/compat.ts";
+import { maxDiff, nameOf, nodeArray, position } from "thug2-level-converter-core/compat/thugpro_nodes.ts";
+import * as colCheck from "thug2-level-converter-core/level_port/col_check.ts";
+import * as prx from "thug2-level-converter-core/level_port/prx.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import { Name, type QbValue, Struct, Vector } from "thug2-level-converter-core/level_port/qb.ts";
+import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
+import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
+import { findPath, resolveInstall } from "thug2-level-converter-core/lib/install.ts";
+import { hex8, isMain, print, pyExit, pyJoin, runMain } from "thug2-level-converter-core/lib/py.ts";
 import { findFolder, LEVELS, levelFiles, STAGING, scriptNames } from "./thps3_levels.ts";
 import { isSpawn, sameFace, USUAL_CLASSES } from "./thugpro_compare.ts";
 import * as thugproNew from "./thugpro_new.ts";
@@ -290,7 +290,7 @@ export interface AppliedCategory {
     mismatches: string[];
 }
 
-// Each edit of the profile's data (tools/pipeline/compat/thugpro/thps3_levels.json) looked up in our converted level
+// Each edit of the profile's data (thug2-level-converter-core/compat/thugpro/thps3_levels.json) looked up in our converted level
 // (<staging>\levels\<level>\<level>.qb / .col.xbx): moved nodes at the data's place and angles, flags added / taken
 // off, terrains, removed nodes gone, renamed nodes under their new name only, added rails there (place, Links),
 // collision objects dropped and faces gone (corners in the same turning). A node our converter leaves out on its own

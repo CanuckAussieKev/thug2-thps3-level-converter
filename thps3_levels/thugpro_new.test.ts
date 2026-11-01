@@ -2,9 +2,9 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import * as qb from "../level_port/qb.ts";
-import { Name, Struct } from "../level_port/qb.ts";
-import { pack } from "../lib/struct.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import { Name, Struct } from "thug2-level-converter-core/level_port/qb.ts";
+import { pack } from "thug2-level-converter-core/lib/struct.ts";
 import { PortChanges } from "./thps3_levels.ts";
 import {
     adaptScript,

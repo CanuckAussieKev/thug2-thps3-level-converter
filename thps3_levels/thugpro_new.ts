@@ -1,10 +1,10 @@
 // NOT ORIGINAL - THUGPRO's own content in its THPS3 level ports: what is new in THUGPRO, in no source game (Morten1337
-// allowed the user to include it, 2026-10-20). The register (tools/pipeline/compat/thugpro/thps3_levels.json) holds only
+// allowed the user to include it, 2026-10-20). The register (thug2-level-converter-core/compat/thugpro/thps3_levels.json) holds only
 // references in its `thugpro_new` section - archive, file, node / sector / script names, a CRC-32 of each item to
 // verify - written by `thugpro_compare.ts --extract-thugpro` (thugpro_new_extract.ts); the bytes are read from the
 // user's THUGPRO install (--thugpro, default %LOCALAPPDATA%\THUG Pro) each time a level is converted, never copied
 // into the repository. A missing install, archive or item, or an item whose CRC differs, is warned about and skipped;
-// nothing fails the conversion. Register row: TPN-THPS3 (tools/pipeline/compat/thugpro/README.md, "New in THUGPRO").
+// nothing fails the conversion. Register row: TPN-THPS3 (thug2-level-converter-core/compat/thugpro/README.md, "New in THUGPRO").
 //
 // The section is compat.ts's form for the two newer sections (thugpro_new, port_changes): {entries: [Entry]}, each
 // with `op`, `id`, `target` ({level, name} here) and `why` - read by compat.thugproNew:
@@ -17,23 +17,23 @@
 
 import * as fs from "node:fs";
 import { crc32 } from "node:zlib";
-import type * as compat from "../compat/compat.ts";
-import { nameOf, nodeArray } from "../compat/thugpro_nodes.ts";
-import * as geometry from "../level_port/geometry.ts";
-import * as prx from "../level_port/prx.ts";
-import * as qb from "../level_port/qb.ts";
-import { Name, type QbValue, Struct } from "../level_port/qb.ts";
-import type * as tex from "../level_port/tex.ts";
-import * as texFile from "../level_port/tex.ts";
-import * as thug2Col from "../level_port/thug2_col.ts";
-import * as thug2Scene from "../level_port/thug2_scene.ts";
-import { findPath } from "../lib/install.ts";
-import { hex8, pyJoin } from "../lib/py.ts";
+import type * as compat from "thug2-level-converter-core/compat/compat.ts";
+import { nameOf, nodeArray } from "thug2-level-converter-core/compat/thugpro_nodes.ts";
+import * as geometry from "thug2-level-converter-core/level_port/geometry.ts";
+import * as prx from "thug2-level-converter-core/level_port/prx.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import { Name, type QbValue, Struct } from "thug2-level-converter-core/level_port/qb.ts";
+import type * as tex from "thug2-level-converter-core/level_port/tex.ts";
+import * as texFile from "thug2-level-converter-core/level_port/tex.ts";
+import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
+import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
+import { findPath } from "thug2-level-converter-core/lib/install.ts";
+import { hex8, pyJoin } from "thug2-level-converter-core/lib/py.ts";
 
 export const DEFAULT_THUGPRO = pyJoin(process.env.LOCALAPPDATA ?? "", "THUG Pro");
 export const REGISTER_ID = "TPN-THPS3";
 
-// The register rows (tools/pipeline/compat/thugpro/README.md "New in THUGPRO"): one per kind of entry.
+// The register rows (thug2-level-converter-core/compat/thugpro/README.md "New in THUGPRO"): one per kind of entry.
 export const ROWS = {
     geometry: "TPN-THPS3-1", // sectors and collision objects
     nodesAdded: "TPN-THPS3-2",

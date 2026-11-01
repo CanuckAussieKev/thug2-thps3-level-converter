@@ -8,13 +8,13 @@
 //               clump's extension). Each clump's declared size leaves out the 12-byte header of the Neversoft chunk
 //               in its extension: the clumps are walked by their children, not their sizes.
 //   <lvl>.tdx   a texture dictionary: D3D8 texture natives (every one in THPS3 PC is 32-bit, one mip level).
-//   <lvl>.qb    the node array (tools/pipeline/level_port/qb.ts reads it: THPS4's token format).
+//   <lvl>.qb    the node array (thug2-level-converter-core/level_port/qb.ts reads it: THPS4's token format).
 //
 // Read field by field; anything not as expected throws FormatError (the self-check parses every file).
 
-import { FormatError, Reader } from "../level_port/binio.ts";
-import { decodeLatin1 } from "../lib/py.ts";
-import { unpackNumbers } from "../lib/struct.ts";
+import { FormatError, Reader } from "thug2-level-converter-core/level_port/binio.ts";
+import { decodeLatin1 } from "thug2-level-converter-core/lib/py.ts";
+import { unpackNumbers } from "thug2-level-converter-core/lib/struct.ts";
 
 export const VERSION = 0x310;
 

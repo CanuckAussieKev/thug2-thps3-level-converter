@@ -1,8 +1,8 @@
 // NOT ORIGINAL - THUGPRO's invisible collision overlays in the THPS3 ports ("collfix": Suburbia's `*_collfix`,
-// Foundry's `*_coll` - TPN-THPS3-1 / -2, tools/pipeline/compat/thugpro/README.md), what the converter's --no-collfix leaves out, and an offline comparison of each
+// Foundry's `*_coll` - TPN-THPS3-1 / -2, thug2-level-converter-core/compat/thugpro/README.md), what the converter's --no-collfix leaves out, and an offline comparison of each
 // overlay with our own converted collision at the same place.
 //
-//   node tools/pipeline/thps3_levels/collfix.ts [--game <folder>] [--json]
+//   node thps3_levels/collfix.ts [--game <folder>] [--json]
 //
 // --game: a THUG2 folder with the converted THPS3 levels (default C:\Games\THUG2 - read only; its Game folder for a
 // stock install). Each overlay's faces against every other collision object's faces near it:
@@ -12,7 +12,7 @@
 //                it: a lip, a bump, a smoothed transition);
 //   back only  - only original faces facing the other way there (the overlay is the missing front face);
 //   none       - no original face there (the overlay closes a gap or is an invisible wall).
-// --json: the spots as tools/pipeline/game/spots.json's `collfix` list (try_spot.ts --list collfix reads that file).
+// --json: the spots as tools/game/spots.json's `collfix` list (try_spot.ts --list collfix reads that file).
 //
 // A standing spot in front of each overlay: from the largest face that faces sideways (a ramp's face, a wall), out
 // along its level normal until there's skatable ground below it (the overlay and the level's faces between are
@@ -20,13 +20,13 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import * as compat from "../compat/compat.ts";
-import * as qb from "../level_port/qb.ts";
-import { QbFile } from "../level_port/qb.ts";
-import * as thug2Col from "../level_port/thug2_col.ts";
-import { parseCli } from "../lib/cli.ts";
-import { findInstall } from "../lib/install.ts";
-import { isMain, print, runMain } from "../lib/py.ts";
+import * as compat from "thug2-level-converter-core/compat/compat.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import { QbFile } from "thug2-level-converter-core/level_port/qb.ts";
+import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
+import { parseCli } from "thug2-level-converter-core/lib/cli.ts";
+import { findInstall } from "thug2-level-converter-core/lib/install.ts";
+import { isMain, print, runMain } from "thug2-level-converter-core/lib/py.ts";
 
 // --- what --no-collfix leaves out (pure, tested) --------------------------------------------------------------------
 
@@ -435,7 +435,7 @@ Compare THUGPRO's collision overlays in the converted THPS3 levels with the leve
 options:
   -h, --help   show this help message and exit
   --game GAME  a THUG2 folder with the converted THPS3 levels (default C:\\Games\\THUG2, read only)
-  --json       print the standing spots as tools/pipeline/game/spots.json's "collfix" list`;
+  --json       print the standing spots as tools/game/spots.json's "collfix" list`;
 
 function main(): number {
     const { values } = parseCli(USAGE, {

@@ -1,41 +1,48 @@
 // NOT ORIGINAL - converts Tony Hawk's Pro Skater 3 (PC) levels to THUG2's formats so that THUG2 can load and play
 // them (see README.md). Nothing of either game is stored in the repo: the files are made from the user's own copies.
 //
-//   node tools/pipeline/thps3_levels/thps3_levels.ts selfcheck [--thug2 C:\Games\THUG2] [--thps3 C:\Games\THPS3]
-//   node tools/pipeline/thps3_levels/thps3_levels.ts convert [levels...] [--thug2 ...] [--thps3 ...] [--out <folder>]
+//   node thps3_levels/thps3_levels.ts selfcheck [--thug2 C:\Games\THUG2] [--thps3 C:\Games\THPS3]
+//   node thps3_levels/thps3_levels.ts convert [levels...] [--thug2 ...] [--thps3 ...] [--out <folder>]
 //   then: node tools/pipeline/menu_level/make_menu_level.ts   (installs them into the data overlay, with level select signs)
 //
 // convert writes <thug2>\thug2-decomp-thps3\ (not read by the game): levels\<level>\<level>.scn.xbx (levelName) /
 // .tex.xbx / .col.xbx / .qb (the node array), the skies (scene and textures) and levels.json (what
-// make_menu_level.ts adds to Levels.qb and the level select: tools/pipeline/level_port/ported_levels.ts).
+// make_menu_level.ts adds to Levels.qb and the level select: thug2-level-converter-core/level_port/ported_levels.ts).
 //
 // THPS3's own formats (RenderWare worlds, texture dictionaries, Neversoft's plugin data) are read by thps3.ts; the
-// THUG2 writers, the geometry conversion, the node arrays and the installing are shared with tools/pipeline/thps4_levels and
-// tools/pipeline/thug1_levels (tools/pipeline/level_port).
+// THUG2 writers, the geometry conversion, the node arrays and the installing are shared with thug2-thps4-level-converter/thps4_levels and
+// thug2-thug1-level-converter/thug1_levels (thug2-level-converter-core/level_port).
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import * as compat from "../compat/compat.ts";
-import { FormatError } from "../level_port/binio.ts";
-import * as common from "../level_port/common.ts";
-import * as geometry from "../level_port/geometry.ts";
-import * as hdTextures from "../level_port/hd_textures.ts";
-import { mipDown } from "../level_port/mips.ts";
-import * as movers from "../level_port/movers.ts";
-import * as nodes from "../level_port/nodes.ts";
-import * as overlayBias from "../level_port/overlay_bias.ts";
-import * as pedRigs from "../level_port/ped_rigs.ts";
-import * as pedsCars from "../level_port/peds_cars.ts";
-import * as portedLevels from "../level_port/ported_levels.ts";
-import * as prx from "../level_port/prx.ts";
-import * as qb from "../level_port/qb.ts";
-import { Name, type QbFile, type QbValue, type Statement, Struct, Vector } from "../level_port/qb.ts";
-import * as scriptPort from "../level_port/script_port.ts";
-import type * as tex from "../level_port/tex.ts";
-import type * as thug2Col from "../level_port/thug2_col.ts";
-import * as thug2Scene from "../level_port/thug2_scene.ts";
-import { trisToStrip } from "../level_port/tri_strip.ts";
-import { resolveInstall } from "../lib/install.ts";
+import * as compat from "thug2-level-converter-core/compat/compat.ts";
+import { FormatError } from "thug2-level-converter-core/level_port/binio.ts";
+import * as common from "thug2-level-converter-core/level_port/common.ts";
+import * as geometry from "thug2-level-converter-core/level_port/geometry.ts";
+import * as hdTextures from "thug2-level-converter-core/level_port/hd_textures.ts";
+import { mipDown } from "thug2-level-converter-core/level_port/mips.ts";
+import * as movers from "thug2-level-converter-core/level_port/movers.ts";
+import * as nodes from "thug2-level-converter-core/level_port/nodes.ts";
+import * as overlayBias from "thug2-level-converter-core/level_port/overlay_bias.ts";
+import * as pedRigs from "thug2-level-converter-core/level_port/ped_rigs.ts";
+import * as pedsCars from "thug2-level-converter-core/level_port/peds_cars.ts";
+import * as portedLevels from "thug2-level-converter-core/level_port/ported_levels.ts";
+import * as prx from "thug2-level-converter-core/level_port/prx.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import {
+    Name,
+    type QbFile,
+    type QbValue,
+    type Statement,
+    Struct,
+    Vector,
+} from "thug2-level-converter-core/level_port/qb.ts";
+import * as scriptPort from "thug2-level-converter-core/level_port/script_port.ts";
+import type * as tex from "thug2-level-converter-core/level_port/tex.ts";
+import type * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
+import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
+import { trisToStrip } from "thug2-level-converter-core/level_port/tri_strip.ts";
+import { resolveInstall } from "thug2-level-converter-core/lib/install.ts";
 import {
     compareStr,
     decodeLatin1,
@@ -54,8 +61,8 @@ import {
     pyTruthy,
     roundHalfEven,
     runMain,
-} from "../lib/py.ts";
-import { StructError, unpackNumbers } from "../lib/struct.ts";
+} from "thug2-level-converter-core/lib/py.ts";
+import { StructError, unpackNumbers } from "thug2-level-converter-core/lib/struct.ts";
 import * as collfix from "./collfix.ts";
 import * as thps3 from "./thps3.ts";
 import { Thps3Peds } from "./thps3_peds.ts";
@@ -67,7 +74,7 @@ export { mipDown, trisToStrip }; // (level_port since the split)
 export const STAGING = "thug2-decomp-thps3";
 
 // The THPS3 levels: folder under Data\Levels, sign text, real-world place, THUG2 sign texture to use as an icon
-// (the level select's own table in tools/pipeline/menu_level/level_select.ts takes precedence), level select number (each its
+// (the level select's own table in thug2-content-pipeline/menu_level/level_select.ts takes precedence), level select number (each its
 // own; no career records - the info panel skips them), converted by default.
 export type LevelRow = [string, string, string, string, number, boolean];
 export const LEVELS: readonly LevelRow[] = [
@@ -357,7 +364,7 @@ export function convertTextures(tdx: readonly thps3.TdxTexture[], mips = true): 
 
 // --- scene and collision -------------------------------------------------------------------------------------------
 
-export const SECTOR_FLAGS = (0x80002000 | thug2Scene.SEC_TEXCOORDS | thug2Scene.SEC_COLORS) >>> 0; // (as tools/pipeline/thps4_levels' sectors)
+export const SECTOR_FLAGS = (0x80002000 | thug2Scene.SEC_TEXCOORDS | thug2Scene.SEC_COLORS) >>> 0; // (as thug2-thps4-level-converter/thps4_levels' sectors)
 
 export function sceneSectors(
     sectors: readonly thps3.Sector[],
@@ -365,7 +372,7 @@ export function sceneSectors(
     checksums: readonly number[],
     skip: ReadonlySet<number>,
 ): geometry.SourceSector[] {
-    // THPS3's atomic sectors as the shared scene converter takes them (tools/pipeline/level_port/geometry.convertScene):
+    // THPS3's atomic sectors as the shared scene converter takes them (thug2-level-converter-core/level_port/geometry.convertScene):
     // per material a strip (the bin mesh's, or its triangle list joined), invisible materials left out, colours
     // made THUG2's (BGRA, 128 = full).
     const out: geometry.SourceSector[] = [];
@@ -679,7 +686,7 @@ export interface ConvertWorldOptions {
     // PC-THPS3-15: the moving sectors (objects) that get collision of their own - in their own space, as drawn - for
     // their LevelObject's CollisionMode=Geometry (THPS3's shape: THUGPRO's collision of the name is left out)
     solid?: ReadonlySet<number>;
-    // --hd-textures: the level's own textures upscaled (tools/pipeline/level_port/hd_textures.ts; THUGPRO's added ones not)
+    // --hd-textures: the level's own textures upscaled (thug2-level-converter-core/level_port/hd_textures.ts; THUGPRO's added ones not)
     hd?: { options: hdTextures.HdOptions; stats: hdTextures.HdStats } | null;
 }
 
@@ -845,7 +852,7 @@ export class PortChanges {
 export const thps3PortChanges = (enabled = true): PortChanges =>
     new PortChanges(compat.portChanges("thps3_levels"), enabled);
 
-// PC-THPS3-1 (port_changes, tools/pipeline/compat/thugpro/thps3_levels.json: `prefixes` per level): sector name prefixes left out.
+// PC-THPS3-1 (port_changes, thug2-level-converter-core/compat/thugpro/thps3_levels.json: `prefixes` per level): sector name prefixes left out.
 // Warehouse: its lights flicker in THPS3 (JKU_Ware_RoomFlicker toggles SkWare_Light_* / SkWare_Dark_*, the same
 // surfaces lit and dark); without that script both sets were drawn - z-fighting. Kept lit, as THPS3's observer mode
 // (JKU_Ware_IsObserver kills SkWare_Dark).
@@ -1611,7 +1618,7 @@ export function portScripts(
     shown: readonly string[] = [],
     collisionOnly: Iterable<number> = [], // (PC-THPS3-17: their Create / Kill kept)
 ): [Map<number, Buffer>, string | null, string, string] {
-    // The level's scripts brought along (tools/pipeline/level_port/script_port.ts) from its nodes' trigger scripts - the
+    // The level's scripts brought along (thug2-level-converter-core/level_port/script_port.ts) from its nodes' trigger scripts - the
     // sectors' and rails' (run by the skater), the made objects' (run by them) - and its start scripts: the scripts
     // THPS3's Load_<base> calls (Foun_Startup...) and the Player1 restart's trigger script (THPS3 runs it when the
     // skater starts: Foundry's sets the press up, makes the bucket). Those run from a setup script THUG2's load_level
@@ -1782,7 +1789,7 @@ const vectorOf = (node: Struct, key: string): readonly number[] | null => {
     return v instanceof Vector && v.kind === "vector" ? v.values : null;
 };
 
-// A node's place as THUGPRO's compatibility data gives it (tools/pipeline/compat/thugpro/thps3_levels.json): THUG2's world (Pos).
+// A node's place as THUGPRO's compatibility data gives it (thug2-level-converter-core/compat/thugpro/thps3_levels.json): THUG2's world (Pos).
 export interface CompatPlacement {
     pos: number[];
     angles: number[];
@@ -1917,7 +1924,7 @@ export function editScripts(data: Buffer, edits: ReadonlyMap<number, ScriptEdit>
     return out;
 }
 
-// THUGPRO's hand edits of a level's nodes (tools/pipeline/thps3_levels/thugpro_compare.ts nodeEdits, the user's decision
+// THUGPRO's hand edits of a level's nodes (thps3_levels/thugpro_compare.ts nodeEdits, the user's decision
 // 2026-10-20: everything THUGPRO changed, as data under the compatibility profile): TP-13 `moved` - {name: place in
 // THUG2's world, angles}; TP-14 `flags` - {name: flags added / removed}; TP-15 `terrain` - {name: TerrainType};
 // TP-16 `removed` - names; TP-17 `renamed` - {THPS3's name: THUGPRO's}; TP-18 `rails` - added rail nodes.
@@ -2027,7 +2034,7 @@ export function applySpawns(converted: Struct[], names: Names, spawns: SpawnComp
     let ordered = "";
     if (spawns.order !== undefined) {
         // (the spawns' slots in the array, refilled in THUGPRO's order; every node's Links follow - as
-        // tools/pipeline/thug1_levels' TP-31)
+        // thug2-thug1-level-converter/thug1_levels' TP-31)
         const isNetSpawn = (node: Struct): boolean => {
             const types = node.get("restart_types");
             return (
@@ -2237,7 +2244,7 @@ export function ctfNodes(
     return [out, scripts.join(""), report];
 }
 
-// The level's compatibility data from the profile (tools/pipeline/compat/compat.ts; TP-10 ctf_flags, TP-11 team_nodes,
+// The level's compatibility data from the profile (thug2-level-converter-core/compat/compat.ts; TP-10 ctf_flags, TP-11 team_nodes,
 // TP-12 spawns).
 export function levelCompat(profile: compat.Profile, level: string): LevelCompat {
     const get = (key: string): Record<string, CompatPlacement> =>
@@ -2580,7 +2587,7 @@ export function convertNodeArray(
         );
         if (fixed.length) newReport.push(`  ped profiles THUG2 hasn't, made THUG2's: ${fixed.join(", ")}`);
         // every human ped (THUGPRO's added ones too) on the skeleton its profile's model is rigged to - a woman's
-        // on THPS6_human is twisted (tools/pipeline/level_port/ped_rigs.ts; load_level_anims loads both: loadAnimsNs)
+        // on THPS6_human is twisted (thug2-level-converter-core/level_port/ped_rigs.ts; load_level_anims loads both: loadAnimsNs)
         const rigs = pedRigs.fixPedRigs(converted, names, (v) => port.assets.femaleRigs.has(v));
         if (rigs.changed.length) newReport.push(`  peds given their profile's skeleton: ${rigs.changed.join(", ")}`);
     }
@@ -2895,7 +2902,7 @@ export function cmdConvert(args: Args): void {
     const scriptsDir = pyJoin(resolveInstall(args.thps3, "thps3"), "Data", "Scripts");
     const levelsQ = new qb.QbFile(read(pyJoin(scriptsDir, "levels.qb")), "levels.qb");
     const lightsQ = new qb.QbFile(read(pyJoin(scriptsDir, "lights.qb")), "lights.qb");
-    // the compatibility profile (tools/pipeline/compat: thugpro - TP-10 / TP-11 - or none)
+    // the compatibility profile (thug2-level-converter-core/compat: thugpro - TP-10 / TP-11 - or none)
     const profile = compat.load(args.compat);
     // (TP-41: THUGPRO's edits of THPS3's scripts, written into them before anything reads them)
     const scriptEdits = freeSkateEdits(profile);
@@ -3154,7 +3161,7 @@ export function cmdConvert(args: Args): void {
         if (hasSetup) entry.setup_script = `${name}_setup`;
         manifest.levels.push(entry);
     }
-    // THPS3's own people the levels use: models, skeletons, animations, peds.json (tools/pipeline/level_port/ped_models.ts)
+    // THPS3's own people the levels use: models, skeletons, animations, peds.json (thug2-level-converter-core/level_port/ped_models.ts)
     if (port?.peds) report.push(port.peds.write(out));
     portedLevels.writeManifest(pyJoin(out, portedLevels.MANIFEST), manifest);
     if (hd) report.push(...hdTextures.report(hd.stats, hd.options));
@@ -3254,7 +3261,7 @@ options:
   --no-mips            convert: no mip levels made (faster)
   --legacy-names       convert: every level named thps3_<folder> (as before THUGPRO's names)
   --compat {thugpro,none}
-                       convert: compatibility profile (tools/pipeline/compat) - thugpro: CTF flags / team nodes,
+                       convert: compatibility profile (thug2-level-converter-core/compat) - thugpro: CTF flags / team nodes,
                        spawns and hand edits as THUGPRO's (TP-10 .. TP-19; default), none: THPS3's own
   --thugpro THUGPRO    convert: THUGPRO's install, read for its new content (TPN-THPS3; default %LOCALAPPDATA%\\THUG Pro)
   --no-thugpro-new     convert: THUGPRO's new content left out, its hand edits kept
@@ -3267,7 +3274,7 @@ options:
   --no-collfix-only NAMES
                        convert: only these overlays left out (comma-separated base names, e.g. SUB_TRamp06)
   --hd-textures [{2,4}]
-                       convert: the textures AI-upscaled (default x4; tools/pipeline/hd_textures/README.md - optional, off
+                       convert: the textures AI-upscaled (default x4; thug2-content-pipeline/hd_textures/README.md - optional, off
                        by default; needs node tools/pipeline/hd_textures/fetch.ts once)
   --hd-model MODEL     convert: realesrgan-x4plus (default) or realesrgan-x4plus-anime
   --hd-max N           convert: the upscaled textures' longer side at most N (default 1024)
@@ -3437,7 +3444,7 @@ export function parseCommandLine(argv: readonly string[]): Args {
 
 export function main(argv: readonly string[] = process.argv.slice(2)): number {
     const args = parseCommandLine(argv);
-    // (the install root or the game folder itself: C:\Games\THUG2 -> C:\Games\THUG2\Game - tools/pipeline/lib/install.ts)
+    // (the install root or the game folder itself: C:\Games\THUG2 -> C:\Games\THUG2\Game - thug2-level-converter-core/lib/install.ts)
     args.thug2 = resolveInstall(args.thug2, "thug2");
     if (args.command === "selfcheck") return cmdSelfcheck(args);
     cmdConvert(args);

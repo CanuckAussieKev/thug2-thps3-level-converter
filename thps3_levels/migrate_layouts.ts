@@ -5,17 +5,17 @@
 // and objects a layout names keep their checksums (THPS3's node names; the made objects' and materials' checksums
 // still use the old name - thps3_levels.ts `tag`).
 //
-//   node tools/pipeline/thps3_levels/migrate_layouts.ts --game C:\Games\THUG2-1 [--thps3 C:\Games\THPS3] [--dry-run] [levels...]
+//   node thps3_levels/migrate_layouts.ts --game C:\Games\THUG2-1 [--thps3 C:\Games\THPS3] [--dry-run] [levels...]
 //
 // The old file is kept as <name>.txt.before-thps3-names; a level whose new file already exists is skipped.
-// (The THAW twin, which also moves positions: tools/pipeline/thaw_levels/migrate_layouts.ts.)
+// (The THAW twin, which also moves positions: thug2-thaw-level-converter/thaw_levels/migrate_layouts.ts.)
 
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { parseArgs } from "node:util";
-import * as qb from "../level_port/qb.ts";
-import { findPath, resolveInstall } from "../lib/install.ts";
-import { hex8, isMain, print, pyExit, pyJoin, runMain } from "../lib/py.ts";
+import * as qb from "thug2-level-converter-core/level_port/qb.ts";
+import { findPath, resolveInstall } from "thug2-level-converter-core/lib/install.ts";
+import { hex8, isMain, print, pyExit, pyJoin, runMain } from "thug2-level-converter-core/lib/py.ts";
 import { LEVELS, legacyName, levelNames } from "./thps3_levels.ts";
 
 const FOLDER = "thug2-decomp-layouts";

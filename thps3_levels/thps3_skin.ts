@@ -24,8 +24,8 @@
 // THPS3's walk bends the knees backwards only that way). The maths below is in the usual (Hamilton) sense: conj() at the
 // files' edges.
 
-import { FormatError, Reader, Writer } from "../level_port/binio.ts";
-import { checksum } from "../level_port/qb.ts";
+import { FormatError, Reader, Writer } from "thug2-level-converter-core/level_port/binio.ts";
+import { checksum } from "thug2-level-converter-core/level_port/qb.ts";
 import * as thps3 from "./thps3.ts";
 
 const SKIN = 0x116;
@@ -286,7 +286,7 @@ export function readSkeleton(data: Buffer, name = "ske"): { parents: number[]; r
 }
 
 // --- THUG2's animation (.ska.xbx) ----------------------------------------------------------------------------------
-// (the layout: tools/pipeline/thug1_levels/thug1.ts untableAnim; the decoders 0x00482C20 / 0x00482E70, the player 0x00484760)
+// (the layout: thug2-thug1-level-converter/thug1_levels/thug1.ts untableAnim; the decoders 0x00482C20 / 0x00482E70, the player 0x00484760)
 // Only the plain key forms are written: rotation {u16 time (frames at 60 a second) | 0x8000 when w < 0, 3 x i16 x y z
 // (/ 16384)}, translation {u8 0, u16 time, 3 x i16 x y z (/ 32)}. A bone without rotation keys is held at no rotation;
 // with these flags every bone's translation is read from its keys (absolute, as THPS3's).

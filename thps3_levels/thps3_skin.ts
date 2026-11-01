@@ -24,8 +24,7 @@
 // THPS3's walk bends the knees backwards only that way). The maths below is in the usual (Hamilton) sense: conj() at the
 // files' edges.
 
-import { FormatError, Reader, Writer } from "thug2-level-converter-core/level_port/binio.ts";
-import { checksum } from "thug2-level-converter-core/level_port/qb.ts";
+import { FormatError, Reader } from "thug2-level-converter-core/level_port/binio.ts";
 import {
     ANIM_FLAGS,
     conj,

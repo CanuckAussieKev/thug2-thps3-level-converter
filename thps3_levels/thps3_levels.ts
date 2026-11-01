@@ -42,27 +42,21 @@ import type * as tex from "thug2-level-converter-core/level_port/tex.ts";
 import type * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
 import { trisToStrip } from "thug2-level-converter-core/level_port/tri_strip.ts";
+import { exitWith, isMain, print, runMain } from "thug2-level-converter-core/lib/cli.ts";
 import { resolveInstall } from "thug2-level-converter-core/lib/install.ts";
+import { truthy } from "thug2-level-converter-core/lib/json.ts";
 import { requireNs } from "thug2-level-converter-core/lib/neverscript.ts";
 import {
-    compareStr,
-    decodeLatin1,
     Float,
-    hex8,
-    isMain,
-    print,
-    pyExit,
-    pyFloatRepr,
-    pyMax,
-    pyMin,
-    pyMod,
-    pyRepr,
-    pyRound,
-    pyTruthy,
+    floatText,
+    floorMod,
+    maxOf,
+    minOf,
     roundHalfEven,
-    runMain,
-} from "thug2-level-converter-core/lib/py.ts";
+    roundTo,
+} from "thug2-level-converter-core/lib/numbers.ts";
 import { StructError, unpackNumbers } from "thug2-level-converter-core/lib/struct.ts";
+import { compareStr, decodeLatin1, hex8, valueText } from "thug2-level-converter-core/lib/text.ts";
 import * as compat from "thug2-thugpro-compat/profile.ts";
 import * as collfix from "./collfix.ts";
 import * as thps3 from "./thps3.ts";
@@ -121,7 +115,7 @@ export function legacyName(base: string): string {
 export function thug2LevelNames(thug2: string): Set<number> {
     const archive = path.join(thug2, "Data", "pre", "qb_scripts.prx");
     const data = fs.existsSync(archive) ? prx.find(archive, "scripts\\game\\levels.qb") : null;
-    if (data === null) pyExit(`${archive}: no scripts\\game\\levels.qb (THUG2's own level names are needed)`);
+    if (data === null) exitWith(`${archive}: no scripts\\game\\levels.qb (THUG2's own level names are needed)`);
     const q = new qb.QbFile(data, "Levels.qb", true);
     return new Set([...q.scripts.keys(), ...q.globals.map(([k]) => k.value)]);
 }
@@ -657,8 +651,8 @@ export function collisionObjects(
         }
         counts.missing += removing.length;
         const colors = sec.colors?.length ? sec.colors : sec.positions.map(() => [255, 255, 255, 255]);
-        const lo = [0, 1, 2].map((k) => pyMin(sec.positions.map((v) => v[k]!)));
-        const hi = [0, 1, 2].map((k) => pyMax(sec.positions.map((v) => v[k]!)));
+        const lo = [0, 1, 2].map((k) => minOf(sec.positions.map((v) => v[k]!)));
+        const hi = [0, 1, 2].map((k) => maxOf(sec.positions.map((v) => v[k]!)));
         out.push({
             checksum: sec.checksum,
             flags: 0,
@@ -1412,8 +1406,8 @@ export class PortedNodes {
         const walking = Boolean(links);
         // (Python's `model or node.get("model") or node.get("Model")`)
         let chosen: QbValue | undefined = model ?? undefined;
-        if (!pyTruthy(chosen)) chosen = node.get("model");
-        if (!pyTruthy(chosen)) chosen = node.get("Model");
+        if (!truthy(chosen)) chosen = node.get("model");
+        if (!truthy(chosen)) chosen = node.get("Model");
         // THPS3's own person of that model (thps3_peds.ts: not the crowds - model given - nor the pros), else THUG2's
         const own =
             model === null && typeof chosen === "string" && this.port?.peds ? this.port.peds.resolve(chosen) : null;
@@ -1580,10 +1574,10 @@ export function proximScriptsNs(name: number, script: number, radius: number, na
     // in feet; the way out 2 feet further (no flicker on the edge). THPS3's script is spawned (run by no object, as
     // THPS3 ran it), with `inside` on the way in.
     const b = `thps3_proxim_${hex8(name)}`;
-    const inner = pyRound(radius / 12.0, 2);
+    const inner = roundTo(radius / 12.0, 2);
     const s = qb.nameText(script, names);
-    const r = pyFloatRepr(inner);
-    const o = pyFloatRepr(inner + 2.0);
+    const r = floatText(inner);
+    const o = floatText(inner + 2.0);
     const text = `script ${b} {
     Obj_ClearExceptions
     Obj_SetInnerRadius ${r}
@@ -1723,7 +1717,7 @@ export function portScripts(
     const report =
         (missing.length ? `TPN-THPS3: set on scripts ours hasn't (not added): ${missing.join(", ")}\n  ` : "") +
         `scripts: ${out.size} brought along (${bytes} bytes), ${dropped} trigger scripts not; ${proxims} proximity ` +
-        `nodes watching; made ${pyRepr(made.counts)}; left out ${leftOutCount} statements: ` +
+        `nodes watching; made ${valueText(made.counts)}; left out ${leftOutCount} statements: ` +
         worst
             .slice(0, 12)
             .map(([k, v]) => `${k} x${v}`)
@@ -2664,7 +2658,7 @@ export function convertNodeArray(
             globalsText + (setup ?? "") + PED_SCRIPTS + ANIMAL_SCRIPTS + CAR_SCRIPTS + loadAnimsNs(made.animals, own);
     }
     let report =
-        `nodes: ${converted.length} of ${array.length} kept ${pyRepr(stats)}; ${triggers.size} kill zones, ` +
+        `nodes: ${converted.length} of ${array.length} kept ${valueText(stats)}; ${triggers.size} kill zones, ` +
         `${hidden.size + later.size} sectors not there at the start`;
     if (scriptReport) report += `\n  ${scriptReport}`;
     report += `\n  ${ctfReport}`;
@@ -2785,7 +2779,7 @@ export function loadScriptInfo(levelsQ: QbFile, base: string): [string | null, n
 }
 
 export function wrapDegrees(value: number): number {
-    return pyMod(value + 180.0, 360.0) - 180.0;
+    return floorMod(value + 180.0, 360.0) - 180.0;
 }
 
 // An int or a float of a statement's values (Python's isinstance(x, (int, float))), else undefined.
@@ -2827,8 +2821,8 @@ export function lighting(lightsQ: QbFile | null, script: number | null): Record<
             } else {
                 k = "ambient_mod_factor";
             }
-            out[`${k}_lo`] = new Float(pyRound(value, 4));
-            out[`${k}_hi`] = new Float(pyRound(value, 4));
+            out[`${k}_lo`] = new Float(roundTo(value, 4));
+            out[`${k}_hi`] = new Float(roundTo(value, 4));
         }
     }
     // SetDFFAmbientColor's values are in a structure ({r= g= b=}): read from the statement's tokens.
@@ -3320,7 +3314,7 @@ const ALL_OPTIONS = [...VALUE_OPTIONS, ...FLAG_OPTIONS, "--hd-textures", "--extr
 
 function usageError(message: string): never {
     process.stderr.write(`${USAGE}\nthps3_levels.ts: error: ${message}\n`);
-    pyExit(2);
+    exitWith(2);
 }
 
 export function parseCommandLine(argv: readonly string[]): Args {
@@ -3343,7 +3337,7 @@ export function parseCommandLine(argv: readonly string[]): Args {
         }
         if (arg === "-h") {
             print(HELP);
-            pyExit(0);
+            exitWith(0);
         }
         const eq = arg.indexOf("=");
         const given = eq < 0 ? arg : arg.slice(0, eq);
@@ -3356,7 +3350,7 @@ export function parseCommandLine(argv: readonly string[]): Args {
         }
         if (option === "--help") {
             print(HELP);
-            pyExit(0);
+            exitWith(0);
         }
         if ((VALUE_OPTIONS as readonly string[]).includes(option)) {
             if (eq >= 0) values[option] = arg.slice(eq + 1);

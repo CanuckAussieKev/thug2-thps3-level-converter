@@ -13,8 +13,8 @@
 // Read field by field; anything not as expected throws FormatError (the self-check parses every file).
 
 import { FormatError, Reader } from "thug2-level-converter-core/level_port/binio.ts";
-import { decodeLatin1 } from "thug2-level-converter-core/lib/py.ts";
 import { unpackNumbers } from "thug2-level-converter-core/lib/struct.ts";
+import { decodeLatin1 } from "thug2-level-converter-core/lib/text.ts";
 
 export const VERSION = 0x310;
 

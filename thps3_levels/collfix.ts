@@ -23,9 +23,8 @@ import * as path from "node:path";
 import * as qb from "thug2-level-converter-core/level_port/qb.ts";
 import { QbFile } from "thug2-level-converter-core/level_port/qb.ts";
 import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
-import { parseCli } from "thug2-level-converter-core/lib/cli.ts";
+import { isMain, parseCli, print, runMain } from "thug2-level-converter-core/lib/cli.ts";
 import { findInstall } from "thug2-level-converter-core/lib/install.ts";
-import { isMain, print, runMain } from "thug2-level-converter-core/lib/py.ts";
 import * as compat from "thug2-thugpro-compat/profile.ts";
 
 // --- what --no-collfix leaves out (pure, tested) --------------------------------------------------------------------

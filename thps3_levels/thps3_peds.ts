@@ -43,7 +43,7 @@ import { checksum } from "thug2-level-converter-core/level_port/qb.ts";
 import * as tex from "thug2-level-converter-core/level_port/tex.ts";
 import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
-import { decodeLatin1, hex8 } from "thug2-level-converter-core/lib/py.ts";
+import { decodeLatin1, hex8 } from "thug2-level-converter-core/lib/text.ts";
 import * as thps3 from "./thps3.ts";
 import * as levels from "./thps3_levels.ts";
 import * as skin from "./thps3_skin.ts";

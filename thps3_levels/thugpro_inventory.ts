@@ -31,8 +31,9 @@ import * as qb from "thug2-level-converter-core/level_port/qb.ts";
 import { Name, type QbValue, Struct, Vector } from "thug2-level-converter-core/level_port/qb.ts";
 import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
+import { exitWith, isMain, print, runMain } from "thug2-level-converter-core/lib/cli.ts";
 import { findPath, resolveInstall } from "thug2-level-converter-core/lib/install.ts";
-import { hex8, isMain, print, pyExit, runMain } from "thug2-level-converter-core/lib/py.ts";
+import { hex8 } from "thug2-level-converter-core/lib/text.ts";
 import * as compat from "thug2-thugpro-compat/profile.ts";
 import { maxDiff, nameOf, nodeArray, position } from "thug2-thugpro-compat/thugpro_nodes.ts";
 import { findFolder, LEVELS, levelFiles, STAGING, scriptNames } from "./thps3_levels.ts";
@@ -469,7 +470,7 @@ export function main(argv: readonly string[] = process.argv.slice(2)): number {
         parsed = parseArgs({ args: [...argv], options: OPTIONS, allowPositionals: true, strict: true });
     } catch (e) {
         process.stderr.write(`${USAGE}\nthugpro_inventory.ts: error: ${(e as Error).message}\n`);
-        pyExit(2);
+        exitWith(2);
     }
     const v = parsed.values;
     if (v.help) {

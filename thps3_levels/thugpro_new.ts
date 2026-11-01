@@ -27,7 +27,7 @@ import * as texFile from "thug2-level-converter-core/level_port/tex.ts";
 import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
 import { findPath } from "thug2-level-converter-core/lib/install.ts";
-import { hex8 } from "thug2-level-converter-core/lib/py.ts";
+import { hex8 } from "thug2-level-converter-core/lib/text.ts";
 import type * as compat from "thug2-thugpro-compat/profile.ts";
 import { nameOf, nodeArray } from "thug2-thugpro-compat/thugpro_nodes.ts";
 

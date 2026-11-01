@@ -28,19 +28,11 @@ import { Name, type QbValue, Struct, Vector } from "thug2-level-converter-core/l
 import * as scriptPort from "thug2-level-converter-core/level_port/script_port.ts";
 import * as thug2Col from "thug2-level-converter-core/level_port/thug2_col.ts";
 import * as thug2Scene from "thug2-level-converter-core/level_port/thug2_scene.ts";
+import { exitWith, isMain, print, runMain } from "thug2-level-converter-core/lib/cli.ts";
 import { findPath, resolveInstall } from "thug2-level-converter-core/lib/install.ts";
-import {
-    Float,
-    formatFixed,
-    hex8,
-    isMain,
-    print,
-    pyExit,
-    pyJsonDumps,
-    pyRound,
-    runMain,
-    writeTextPy,
-} from "thug2-level-converter-core/lib/py.ts";
+import { jsonText } from "thug2-level-converter-core/lib/json.ts";
+import { Float, formatFixed, roundTo } from "thug2-level-converter-core/lib/numbers.ts";
+import { hex8, writeText } from "thug2-level-converter-core/lib/text.ts";
 import {
     CTF_NAMES,
     isCrown,
@@ -223,7 +215,7 @@ export function compare(
     out.nodes_theirs = theirs.array.length;
     out.shared = shared;
     out.same_place = same;
-    out.worst = [new Float(pyRound(worst[0], 3)), worst[1]];
+    out.worst = [new Float(roundTo(worst[0], 3)), worst[1]];
     out.crowns = sameSequence(sequence(ours.array, isCrown), sequence(theirs.array, isCrown))[0];
     out.mp_restarts = sameSequence(sequence(ours.array, isMpRestart), sequence(theirs.array, isMpRestart))[0];
     // every network spawn by name, in array order (THUG2 starts player n at the n-th Multiplayer restart)
@@ -927,7 +919,7 @@ export function main(argv: readonly string[] = process.argv.slice(2)): number {
         parsed = parseArgs({ args: [...argv], options: OPTIONS, allowPositionals: true, strict: true });
     } catch (e) {
         process.stderr.write(`${USAGE}\nthugpro_compare.ts: error: ${(e as Error).message}\n`);
-        pyExit(2);
+        exitWith(2);
     }
     const v = parsed.values;
     if (v.help) {
@@ -956,7 +948,7 @@ export function main(argv: readonly string[] = process.argv.slice(2)): number {
     }
     const staging = v.staging || path.join(thug2, STAGING);
     const manifest = portedLevels.readManifest(path.join(staging, portedLevels.MANIFEST));
-    if (!manifest) pyExit(`${staging}: no ${portedLevels.MANIFEST} (convert first)`);
+    if (!manifest) exitWith(`${staging}: no ${portedLevels.MANIFEST} (convert first)`);
     let entries = manifest.levels;
     if (parsed.positionals.length) {
         const wanted = new Set(parsed.positionals.map((x) => x.toLowerCase()));
@@ -1020,7 +1012,7 @@ export function main(argv: readonly string[] = process.argv.slice(2)): number {
         if (!r.same_load_script && !THUG2_OWN.has(r.folder.toLowerCase())) bad += 1;
         if (r.crowns !== "same" && !THUG2_OWN.has(r.folder.toLowerCase())) bad += 1;
     }
-    if (v.json) writeTextPy(v.json, pyJsonDumps(results, 1));
+    if (v.json) writeText(v.json, jsonText(results, 1));
     return bad ? 1 : 0;
 }
 

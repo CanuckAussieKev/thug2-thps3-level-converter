@@ -1,6 +1,6 @@
 {
   "name": "thug2-thps3-level-converter",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "type": "module",
   "description": "THUG2 THPS3 Level Converter: Tony Hawk's Pro Skater 3 (PC) levels converted to Tony Hawk's Underground 2's formats.",
@@ -29,8 +29,8 @@
     "test": "node --test \"**/*.test.ts\""
   },
   "dependencies": {
-    "thug2-level-converter-core": "git+https://git@github.com/CanuckAussieKev/thug2-level-converter-core.git#1d172be89692cff3859b379937e842a9fdac4fd2",
-    "thug2-thugpro-compat": "git+https://git@github.com/CanuckAussieKev/thug2-thugpro-compat.git#39f28fbfe236ffe6b93773fcd35bb9734c032198"
+    "thug2-level-converter-core": "git+https://git@github.com/CanuckAussieKev/thug2-level-converter-core.git#3f7390a5f224cd1c71fcec8077284961dc3610be",
+    "thug2-thugpro-compat": "git+https://git@github.com/CanuckAussieKev/thug2-thugpro-compat.git#ca72ba8ed6dcdfddb18d4062b0c756516ac44068"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
